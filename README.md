@@ -27,17 +27,17 @@ try db.exec("CREATE TABLE demo(a INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, b I
 ```
 ## Prepare a statement and run with parameters
 ```swift
-        // Prepare once
-        let insert = try Statement(database: db, sql: "INSERT INTO demo (b) VALUES (?)")
-        for i in 0..<10 {
-            // Parameters are 1 based, this is how SQLite works
-            try insert.bind(param: 1,i)
-            try insert.step() // Run the statement
-            let last_row_id = db.lastInsertRowId
-            print("Last row id is: \(last_row_id)")
-            try insert.reset() // must reset before we can run it again
-            try insert.clearBindings() // Bindings are not cleared automatically, since we bind the same param again, this is not strictly required in this example, but it's good practice to clear the bindings.
-        }
+// Prepare once
+let insert = try Statement(database: db, sql: "INSERT INTO demo (b) VALUES (?)")
+for i in 0..<10 {
+    // Parameters are 1 based, this is how SQLite works
+    try insert.bind(param: 1,i)
+    try insert.step() // Run the statement
+    let last_row_id = db.lastInsertRowId
+    print("Last row id is: \(last_row_id)")
+    try insert.reset() // must reset before we can run it again
+    try insert.clearBindings() // Bindings are not cleared automatically, since we bind the same param again, this is not strictly required in this example, but it's good practice to clear the bindings.
+}
 ```
 ## Run SELECT queries
 ```swift
@@ -59,7 +59,9 @@ Add the following to your Package.swift dependencies:
 
 ```swift
 dependencies: [
+...
 .package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.1")
+...
 ]
 ```
 ## To an existing Xcode project
