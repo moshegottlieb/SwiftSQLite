@@ -62,3 +62,9 @@ dependencies: [
 .package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.1")
 ]
 ```
+## To an existing Xcode project
+
+Select your project, in the *general* tab, under *Frameworks and Libraries*, hit the **+** button.  
+Enter the URL:  
+`https://github.com/moshegottlieb/SwiftSQLite.git`  
+Choose your version, and you're done.
