@@ -1,5 +1,8 @@
 # SwiftSQLite
 
+![Swift](https://github.com/moshegottlieb/SwiftSQLite/workflows/Swift/badge.svg)
+
+
 SQLite wrapper for swift, nothing more, nothing less.  
 
 ## What it is 
