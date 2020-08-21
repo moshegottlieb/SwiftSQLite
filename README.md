@@ -50,3 +50,15 @@ while try select.step() {
     print("a: \(a), b: \(b)")
 }
 ```
+
+### Install
+
+## Swift Package Manager
+
+Add the following to your Package.swift dependencies:
+
+```swift
+dependencies: [
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.1")
+]
+```
