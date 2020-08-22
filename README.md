@@ -20,7 +20,7 @@ If you want a light local database API without all the bells and whistles of oth
 ## Create a DB connection
 ```swift
 // For example, place the database in the user's library folder
-guard let path = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first?.appendingPathComponent("db.sqlite").absoluteString else { fatalError("Could not create path")
+guard let path = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first?.appendingPathComponent("db.sqlite").absoluteString else { fatalError("Could not create path") }
 let db = try Database(path:path)
 ```
 
