@@ -38,7 +38,7 @@ public class Statement {
     ///   - database: Database connection
     ///   - sql: SQL statement
     /// - Throws: Throws a DatabaseError for SQLite errors, tyipcally for syntax errors
-    public init(database:Database,sql:String) throws {
+    required public init(database:Database,sql:String) throws {
         self.db = database
         var stmt:OpaquePointer?
         try database.check(sqlite3_prepare_v2(database.handle, sql, -1, &stmt, nil))

@@ -141,6 +141,15 @@ final class SwiftSQLiteTests: XCTestCase {
         XCTAssertNoThrow(try t())
     }
     
+    func testJournalMode(){
+        let t = {
+            try self.db.set(journalMode: .off) // OK to set off for memory databases
+            let mode = try self.db.journalMode()
+            XCTAssertEqual(mode, .off)
+        }
+        XCTAssertNoThrow(try t())
+    }
+    
     private func statement(_ sql:String) throws -> Statement {
         return try Statement(database: self.db, sql: sql)
     }
@@ -152,7 +161,8 @@ final class SwiftSQLiteTests: XCTestCase {
         ("testInvalidSql", testInvalidSql),
         ("testSelect", testSelect),
         ("testNamesTypes", testNamesTypes),
-        ("testLastRowId", testLastRowId)
+        ("testLastRowId", testLastRowId),
+        ("testJournalMode", testJournalMode)
     ]
     
     private var db:Database!

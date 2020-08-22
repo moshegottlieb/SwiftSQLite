@@ -17,18 +17,18 @@ If you want a light local database API without all the bells and whistles of oth
 
 ## Cook book
 
-## Create a DB connection
+### Create a DB connection
 ```swift
 // For example, place the database in the user's library folder
 guard let path = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first?.appendingPathComponent("db.sqlite").absoluteString else { fatalError("Could not create path") }
 let db = try Database(path:path)
 ```
 
-## Run a simple SQL statement
+### Run a simple SQL statement
 ```swift
 try db.exec("CREATE TABLE demo(a INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, b INTEGER NOT NULL)")
 ```
-## Prepare a statement and run with parameters
+### Prepare a statement and run with parameters
 ```swift
 // Prepare once
 let insert = try Statement(database: db, sql: "INSERT INTO demo (b) VALUES (?)")
@@ -42,7 +42,7 @@ for i in 0..<10 {
     try insert.clearBindings() // Bindings are not cleared automatically, since we bind the same param again, this is not strictly required in this example, but it's good practice to clear the bindings.
 }
 ```
-## Run SELECT queries
+### Run SELECT queries
 ```swift
 let select = try Statement(database: db, sql: "SELECT a,b FROM demo WHERE b > ?")
 try select.bind(param: 1, 5)
@@ -54,7 +54,16 @@ while try select.step() {
 }
 ```
 
-### Install
+## Additional helpers and wrappers
+
+### Set [journal mode](https://www.sqlite.org/pragma.html#pragma_journal_mode) 
+
+```swift
+try db.set(journalMode: .wal) // Set journaling mode to WAL, useful when several processes read the datbase file, such as with an app and an app extension
+let current_mode = try db.journalMode()
+```
+
+# Install
 
 ## Swift Package Manager
 
