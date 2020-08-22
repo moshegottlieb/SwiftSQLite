@@ -31,7 +31,7 @@ try db.exec("CREATE TABLE demo(a INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, b I
 ### Prepare a statement and run with parameters
 ```swift
 // Prepare once
-let insert = try Statement(database: db, sql: "INSERT INTO demo (b) VALUES (?)")
+let insert = try db.statement(sql: "INSERT INTO demo (b) VALUES (?)")
 for i in 0..<10 {
     // Parameters are 1 based, this is how SQLite works
     try insert.bind(param: 1,i)
@@ -44,7 +44,7 @@ for i in 0..<10 {
 ```
 ### Run SELECT queries
 ```swift
-let select = try Statement(database: db, sql: "SELECT a,b FROM demo WHERE b > ?")
+let select = try db.statement(sql: "SELECT a,b FROM demo WHERE b > ?")
 try select.bind(param: 1, 5)
 while try select.step() {
     guard let a = select.integer(column: 0), let b = select.string(column: 1) else {

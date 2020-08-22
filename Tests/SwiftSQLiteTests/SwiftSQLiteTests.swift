@@ -11,7 +11,7 @@ final class SwiftSQLiteTests: XCTestCase {
     
     func testInsert(){
         let t = {
-            let stmt = try self.statement("INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
+            let stmt = try self.db.statement(sql:"INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
             try stmt.bind(param: 1, 123.2)
             try stmt.bind(param: 2, 123)
             try stmt.bind(param: 3, "123")
@@ -24,7 +24,7 @@ final class SwiftSQLiteTests: XCTestCase {
     
     func testInsertNull(){
         let t = {
-            let stmt = try self.statement("INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
+            let stmt = try self.db.statement(sql:"INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
             try stmt.bind(param: 1)
             try stmt.bind(param: 2)
             try stmt.bind(param: 3)
@@ -36,14 +36,14 @@ final class SwiftSQLiteTests: XCTestCase {
     
     func testInsertDefault(){
         let t = {
-            let stmt = try self.statement("INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
+            let stmt = try self.db.statement(sql:"INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
             try stmt.step()
         }
         XCTAssertNoThrow(try t())
     }
     func testInvalidSql(){
         let t = {
-            let stmt = try self.statement("Always look on the bright side of life")
+            let stmt = try self.db.statement(sql:"Always look on the bright side of life")
             try stmt.step()
         }
         XCTAssertThrowsError(try t())
@@ -51,7 +51,7 @@ final class SwiftSQLiteTests: XCTestCase {
     
     func testSelect(){
         let t = {
-            let stmt = try self.statement("INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
+            let stmt = try self.db.statement(sql:"INSERT INTO test(a,b,c,d) VALUES (?,?,?,?)")
             for i in 0..<10 {
                 try stmt.bind(param: 1, Double(i)/2)
                 try stmt.bind(param: 2, i)
@@ -60,7 +60,7 @@ final class SwiftSQLiteTests: XCTestCase {
                 try stmt.step()
                 try stmt.reset()
             }
-            let select = try self.statement("SELECT * FROM test ORDER BY ROWID")
+            let select = try self.db.statement(sql:"SELECT * FROM test ORDER BY ROWID")
             var count = 0
             while (try select.step()){
                 let dbl = select.double(column: 0)
@@ -89,19 +89,19 @@ final class SwiftSQLiteTests: XCTestCase {
     func testNamesTypes(){
         
         let t = {
-            let stmt_i = try self.statement("SELECT 1")
+            let stmt_i = try self.db.statement(sql:"SELECT 1")
             XCTAssert(try stmt_i.step())
             XCTAssertEqual(stmt_i.columns(),1)
             XCTAssertEqual(stmt_i.type(column: 0),.integer)
             XCTAssertEqual(stmt_i.name(column: 0),"1")
             XCTAssertEqual(stmt_i.integer(column: 0),1)
-            let stmt_d = try self.statement("SELECT 1.1")
+            let stmt_d = try self.db.statement(sql:"SELECT 1.1")
             XCTAssert(try stmt_d.step())
             XCTAssertEqual(stmt_d.columns(),1)
             XCTAssertEqual(stmt_d.type(column: 0),.double)
             XCTAssertEqual(stmt_d.name(column: 0),"1.1")
             XCTAssertEqual(stmt_d.double(column: 0),1.1)
-            let stmt_s = try self.statement("SELECT 'A'")
+            let stmt_s = try self.db.statement(sql:"SELECT 'A'")
             XCTAssert(try stmt_s.step())
             XCTAssertEqual(stmt_s.columns(),1)
             XCTAssertEqual(stmt_s.type(column: 0),.string)
@@ -109,17 +109,17 @@ final class SwiftSQLiteTests: XCTestCase {
             XCTAssertNil(stmt_s.tableName(column: 0), "Table name should be nil, as there is no table")
             XCTAssertEqual(stmt_s.name(column: 0),"'A'")
             XCTAssertEqual(stmt_s.string(column: 0),"A")
-            let stmt_b = try self.statement("SELECT x'0500'")
+            let stmt_b = try self.db.statement(sql:"SELECT x'0500'")
             XCTAssert(try stmt_b.step())
             XCTAssertEqual(stmt_b.columns(),1)
             XCTAssertEqual(stmt_b.type(column: 0),.data)
-            let stmt_n = try self.statement("SELECT NULL")
+            let stmt_n = try self.db.statement(sql:"SELECT NULL")
             XCTAssert(try stmt_n.step())
             XCTAssertEqual(stmt_n.columns(),1)
             XCTAssertEqual(stmt_n.type(column: 0),.null)
             XCTAssert(stmt_n.isNull(column: 0))
             try self.db.exec("CREATE TABLE test1 (a INT)")
-            let stmt_t = try self.statement("SELECT test.a at,test1.a at1 FROM test,test1")
+            let stmt_t = try self.db.statement(sql:"SELECT test.a at,test1.a at1 FROM test,test1")
             XCTAssertEqual(stmt_t.name(column: 0),"at")
             XCTAssertEqual(stmt_t.name(column: 1),"at1")
             XCTAssertEqual(stmt_t.tableName(column: 0),"test")
@@ -133,7 +133,7 @@ final class SwiftSQLiteTests: XCTestCase {
     func testLastRowId(){
         let t = {
             try self.db.exec("CREATE TABLE auto_inc(id INTEGER PRIMARY KEY AUTOINCREMENT, value TEXT)")
-            let stmt = try Statement(database: self.db, sql: "INSERT INTO auto_inc (value) VALUES ('Some text')")
+            let stmt = try self.db.statement(sql: "INSERT INTO auto_inc (value) VALUES ('Some text')")
             try stmt.step()
             let last_row_id = self.db.lastInsertRowId
             XCTAssert(last_row_id > 0)
@@ -148,10 +148,6 @@ final class SwiftSQLiteTests: XCTestCase {
             XCTAssertEqual(mode, .off)
         }
         XCTAssertNoThrow(try t())
-    }
-    
-    private func statement(_ sql:String) throws -> Statement {
-        return try Statement(database: self.db, sql: sql)
     }
 
     static var allTests = [
