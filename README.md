@@ -5,14 +5,14 @@
 
 SQLite wrapper for swift, nothing more, nothing less.  
 
-## What it is 
+## What is it?
 A simple straight forward wrapper for the C API of SQLite.  
 Connect to SQLite databases, run queries, prepare statements and bind parameters, just like you'd do with the regular SQLite API, just with a swift wrapper.  
 If you want a light local database API without all the bells and whistles of other SQLite wrappers - this library is for you
 
 ## What it is **NOT**
 - This is **not** another ORM database
-- it will not try to save you from using the wrong thread when you shouldn't be doing that
+- It will not try to save you from using the wrong thread when you shouldn't be doing that
 - It will not guess your scheme, create it, maintain it, and automagically sync to a remote server with zero code on your part - if you like the idea of zero coding - you're in the wrong line of work
 
 ## Cook book
@@ -67,7 +67,7 @@ dependencies: [
 ...
 ]
 ```
-## To an existing Xcode project
+## How to add to an existing Xcode project
 
 Select your project, in the *general* tab, under *Frameworks and Libraries*, hit the **+** button.  
 Enter the URL:  
