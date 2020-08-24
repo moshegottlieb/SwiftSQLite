@@ -149,6 +149,31 @@ final class SwiftSQLiteTests: XCTestCase {
         }
         XCTAssertNoThrow(try t())
     }
+    func testForeignKeys(){
+        let t = {
+            try self.db.exec("CREATE TABLE F1(a INTEGER PRIMARY KEY NOT NULL)")
+            try self.db.exec("CREATE TABLE F2(a INTEGER PRIMARY KEY NOT NULL REFERENCES F1(a) ON DELETE CASCADE)")
+            try self.db.exec("INSERT INTO F1 VALUES (1)")
+            try self.db.withForeignKeys {
+                XCTAssert(self.db.foreignKeys)
+                try self.db.exec("INSERT INTO F2 VALUES (1)")
+                XCTAssertThrowsError(try self.db.exec("INSERT INTO F2 VALUES (2)"))
+                try self.db.exec("DELETE FROM F1")
+                let cnt_stmt = try self.db.statement(sql: "SELECT COUNT(*) FROM F2")
+                XCTAssert(try cnt_stmt.step())
+                let cnt = cnt_stmt.integer(column: 0)
+                XCTAssertNotNil(cnt)
+                XCTAssertEqual(cnt, 0)
+            }
+            try self.db.withoutForeignKeys {
+                self.db.foreignKeys = false
+                try self.db.exec("INSERT INTO F2 VALUES (3)")
+                try self.db.exec("DROP TABLE F2")
+                try self.db.exec("DROP TABLE F1")
+            }
+        }
+        XCTAssertNoThrow(try t())
+    }
 
     static var allTests = [
         ("testInsert", testInsert),
@@ -158,7 +183,8 @@ final class SwiftSQLiteTests: XCTestCase {
         ("testSelect", testSelect),
         ("testNamesTypes", testNamesTypes),
         ("testLastRowId", testLastRowId),
-        ("testJournalMode", testJournalMode)
+        ("testJournalMode", testJournalMode),
+        ("testForeignKeys", testForeignKeys)
     ]
     
     private var db:Database!

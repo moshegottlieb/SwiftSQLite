@@ -62,6 +62,29 @@ while try select.step() {
 try db.set(journalMode: .wal) // Set journaling mode to WAL, useful when several processes read the datbase file, such as with an app and an app extension
 let current_mode = try db.journalMode()
 ```
+### [Auto vacuum](https://sqlite.org/pragma.html#pragma_auto_vacuum)
+```swift
+let db.set(autoVacuum:.incremental)
+// do some inserts, deletes here
+try db.incrementalVacuum()
+```
+
+### [Vacuum](https://sqlite.org/lang_vacuum.html)
+```swift
+try db.vacuum()
+```
+
+### [Foreign keys on/off](https://sqlite.org/pragma.html#pragma_foreign_keys)
+```swift
+db.foreignKeys = true
+// foreign keys are now enforced
+try db.withoutForeignKeys {
+    // This code will run without foreign keys enforcement 
+}
+try db.withForeignKeys {
+    // This code will run with foreign keys enforcement
+}
+```
 
 # Install
 
