@@ -98,13 +98,13 @@ public class Database {
     /// Easy wrapper to prepare and execute an SQL statement
     /// - Parameter sql: SQL statement
     /// - Throws: DatabaseError
-    func exec(_ sql:String) throws {
+    public func exec(_ sql:String) throws {
         let stmt = try Statement(database: self, sql: sql)
         try stmt.step()
     }
     
     /// Set to `true` to enforce foreign keys, or `false` to disable foreign keys. See [PRAGMA foreign_keys](https://sqlite.org/pragma.html#pragma_foreign_keys) for more information.
-    var foreignKeys : Bool {
+    public var foreignKeys : Bool {
         set {
             let sql = "PRAGMA foreign_keys = \(newValue ? "true" : "false")"
             try! exec(sql)
@@ -122,14 +122,14 @@ public class Database {
     /// - Parameter exec: A code block that may throw, and may return any value
     /// - Throws: Rethrows errors thrown from the code block
     /// - Returns: Returns the return value of the code block
-    func withForeignKeys<R>(exec:() throws ->R) rethrows -> R{
+    public func withForeignKeys<R>(exec:() throws ->R) rethrows -> R{
         return try withForeignKeys(on: true, exec: exec)
     }
     /// A wrapper for `withForeignKeys<R>(on:Bool, exec:() throws ->R) rethrows -> R`, with an OFF value, use to perform code with foreign keys support turned off
     /// - Parameter exec: A code block that may throw, and may return any value
     /// - Throws: Rethrows errors thrown from the code block
     /// - Returns: Returns the return value of the code block
-    func withoutForeignKeys<R>(exec:() throws ->R) rethrows -> R{
+    public func withoutForeignKeys<R>(exec:() throws ->R) rethrows -> R{
         return try withForeignKeys(on: false, exec: exec)
     }
     
@@ -139,7 +139,7 @@ public class Database {
     ///   - exec: A code block that may throw, and may return any value
     /// - Throws: Rethrows errors thrown from the code block
     /// - Returns: Returns the return value of the code block
-    func withForeignKeys<R>(on:Bool, exec:() throws ->R) rethrows -> R{
+    public func withForeignKeys<R>(on:Bool, exec:() throws ->R) rethrows -> R{
         let current = foreignKeys
         guard on != current else {
             return try exec() // no need to change anything
@@ -152,7 +152,7 @@ public class Database {
     }
     
     /// Set auto vacuum mode, auto-vacuuming is only possible if the database stores some additional information that allows each database page to be traced backwards to its referrer. Therefore, auto-vacuuming must be turned on before any tables are created. It is not possible to enable or disable auto-vacuum after a table has been created.
-    enum AutoVacuum : Int{
+    public enum AutoVacuum : Int{
         /// The default setting for auto-vacuum is 0 or "none", unless the SQLITE_DEFAULT_AUTOVACUUM compile-time option is used. The "none" setting means that auto-vacuum is disabled. When auto-vacuum is disabled and data is deleted data from a database, the database file remains the same size. Unused database file pages are added to a "freelist" and reused for subsequent inserts. So no database file space is lost. However, the database file does not shrink. In this mode the VACUUM command can be used to rebuild the entire database file and thus reclaim unused disk space.
         case none = 0
         /// When the auto-vacuum mode is 1 or "full", the freelist pages are moved to the end of the database file and the database file is truncated to remove the freelist pages at every transaction commit. Note, however, that auto-vacuum only truncates the freelist pages from the file. Auto-vacuum does not defragment the database nor repack individual database pages the way that the VACUUM command does. In fact, because it moves pages around within the file, auto-vacuum can actually make fragmentation worse.
@@ -168,7 +168,7 @@ public class Database {
     ///   - autoVacuum: Auto vacuum mode
     ///   - schema: Optional scheme
     /// - Throws: DatabaseError
-    func set(autoVacuum:AutoVacuum,schema:String? = nil) throws {
+    public func set(autoVacuum:AutoVacuum,schema:String? = nil) throws {
         let sql = schemaStatement(template: "PRAGMA %@auto_vacuum = \(autoVacuum.rawValue)", schema: schema)
         try exec(sql)
     }
@@ -176,7 +176,7 @@ public class Database {
     /// - Parameter schema: Optional schema
     /// - Throws: DatabaseError
     /// - Returns: AutoVacuum mode
-    func autoVacuum(schema:String? = nil) throws -> AutoVacuum{
+    public func autoVacuum(schema:String? = nil) throws -> AutoVacuum{
         let sql = schemaStatement(template: "PRAGMA %@auto_vacuum", schema: schema)
         let stmt = try statement(sql: sql)
         guard try stmt.step() else {
@@ -189,7 +189,7 @@ public class Database {
     ///   - pages: Number of pages to remove, 0 or nil will clear the entire free list
     ///   - schema: Optional schema
     /// - Throws: DatabaseError
-    func incrementalVacuum(pages:Int? = nil,schema:String? = nil) throws {
+    public func incrementalVacuum(pages:Int? = nil,schema:String? = nil) throws {
         let sql:String
         if let pages = pages {
             sql = schemaStatement(template: "PRAGMA %@incremental_vacuum(\(pages))", schema: schema)
@@ -199,7 +199,7 @@ public class Database {
         try exec(sql)
     }
     
-    func vacuum(schema:String? = nil,into:String? = nil) throws {
+    public func vacuum(schema:String? = nil,into:String? = nil) throws {
         let sql:String
         if let into = into {
             let into_escaped = into.replacingOccurrences(of: "'", with: "''")
@@ -208,6 +208,10 @@ public class Database {
             sql = schemaStatement(template: "VACUUM %@", schema: schema)
         }
         try exec(sql)
+    }
+    
+    public func set(busyTimeout ms:Int) throws {
+        try check(sqlite3_busy_timeout(self.handle,Int32(ms)))
     }
     
     deinit {
@@ -221,7 +225,7 @@ public class Database {
     /// try stmt.step()
     /// let last_row_id = self.db.lastInsertRowId // last_row_id is > 0
     /// ```
-    var lastInsertRowId : Int64 {
+    public var lastInsertRowId : Int64 {
         return sqlite3_last_insert_rowid(handle)
     }
     

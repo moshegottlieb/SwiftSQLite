@@ -85,6 +85,13 @@ try db.withForeignKeys {
     // This code will run with foreign keys enforcement
 }
 ```
+### Set busy timeout
+```swift
+try db.set(busyTimoeut:30)
+```
+This will install a busy handler that will sleep until the database unlocks or until the timeout expires, useful for WAL mode.  
+See [busy handler](http://sqlite.org/c3ref/busy_handler.html) and [PRAGMA busy_timouet](https://sqlite.org/pragma.html#pragma_busy_timeout).      
+Note that there can be only a single busy handler for a database connection.  
 
 # Install
 
