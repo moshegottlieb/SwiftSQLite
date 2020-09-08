@@ -175,6 +175,16 @@ final class SwiftSQLiteTests: XCTestCase {
         XCTAssertNoThrow(try t())
     }
 
+    func testVersion(){
+        let t = {
+            let v = try self.db.get(version: .user)
+            XCTAssert(v == 0)
+            try self.db.set(version: 1)
+            XCTAssert(try self.db.get(version: .user) == 1)
+        }
+        XCTAssertNoThrow(try t())
+    }
+    
     static var allTests = [
         ("testInsert", testInsert),
         ("testInsertNull", testInsertNull),
@@ -184,7 +194,8 @@ final class SwiftSQLiteTests: XCTestCase {
         ("testNamesTypes", testNamesTypes),
         ("testLastRowId", testLastRowId),
         ("testJournalMode", testJournalMode),
-        ("testForeignKeys", testForeignKeys)
+        ("testForeignKeys", testForeignKeys),
+        ("testVersion", testVersion)
     ]
     
     private var db:Database!

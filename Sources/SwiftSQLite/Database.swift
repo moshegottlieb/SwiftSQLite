@@ -199,6 +199,12 @@ public class Database {
         try exec(sql)
     }
     
+    /// Manually vacuum the database
+    /// It's important to keep your room neat and tidy! vacuum from time to time to reclaim unused pages, caused by deletes, this call vacuums some pages that cannot be reclaimed with auto vacuum.
+    /// - Parameters:
+    ///   - schema:Optional schema
+    ///   - into: Optional new database path, if provided, a new vacuumed database will be created in the provided path
+    /// - Throws: DatabaseError
     public func vacuum(schema:String? = nil,into:String? = nil) throws {
         let sql:String
         if let into = into {
@@ -210,9 +216,13 @@ public class Database {
         try exec(sql)
     }
     
+    /// Set the busy timeout, useful for WAL mode. See [sqlite3_busy_timeout()](https://sqlite.org/c3ref/busy_timeout.html)
+    /// - Parameter ms: Milleseconds for timeout
+    /// - Throws: DatabaseError
     public func set(busyTimeout ms:Int) throws {
         try check(sqlite3_busy_timeout(self.handle,Int32(ms)))
     }
+    
     
     deinit {
         sqlite3_close(handle)
@@ -229,6 +239,42 @@ public class Database {
         return sqlite3_last_insert_rowid(handle)
     }
     
+    /// Version type - see set(version:,for:,schema:)
+    public enum Version : String {
+        /// See [PRAGMA data_version](https://sqlite.org/pragma.html#pragma_data_version)
+        case data = "data_version"
+        /// See [PRAGMA schema_version](https://sqlite.org/pragma.html#pragma_schema_version)
+        case schema = "schema_version"
+        /// See [PRAGMA user_version](https://sqlite.org/pragma.html#pragma_user_version)
+        case user = "user_version"
+    }
+    
+    /// Set user version
+    /// - Parameters:
+    ///   - version: Version numeric value
+    ///   - schema: Optional schema
+    /// - Throws: DatabaseError
+    public func set(version:Int,schema:String? = nil) throws {
+        let sql:String
+        sql = schemaStatement(template: "PRAGMA %@user_version = \(version)", schema: schema)
+        try exec(sql)
+    }
+    
+    /// Get version integer value
+    /// - Parameters:
+    ///   - version: Version type (`user`, by default)
+    ///   - schema: Optional schema
+    /// - Throws: DatabaseError
+    /// - Returns: Version integer value
+    public func get(version:Version,schema:String? = nil) throws -> Int {
+        let sql:String
+        sql = schemaStatement(template: "PRAGMA %@\(version.rawValue)", schema: schema)
+        let stmt = try statement(sql: sql)
+        guard try stmt.step() else {
+            throw DatabaseError(reason: "Error fetching version",code:-1)
+        }
+        return stmt.integer(column: 0)!
+    }
     
     internal static func check(_ rc:Int32,handle:OpaquePointer?) throws {
         guard  rc == SQLITE_OK else {

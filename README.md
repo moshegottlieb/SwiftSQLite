@@ -93,6 +93,21 @@ This will install a busy handler that will sleep until the database unlocks or u
 See [busy handler](http://sqlite.org/c3ref/busy_handler.html) and [PRAGMA busy_timouet](https://sqlite.org/pragma.html#pragma_busy_timeout).      
 Note that there can be only a single busy handler for a database connection.  
 
+### Versions
+
+Set the user version or get the user, data or schema versions.   
+See [PRAGMA data_version](https://sqlite.org/pragma.html#pragma_data_version)  
+See [PRAGMA schema_version](https://sqlite.org/pragma.html#pragma_schema_version)  
+See [PRAGMA user_version](https://sqlite.org/pragma.html#pragma_user_version)
+
+```swift
+let user_version = try db.get(version: .user) // 0 by default
+let schema_version = try db.get(version: .schema) 
+let data_version = try db.get(version: .data) 
+try db.set(version:12)
+
+```
+
 # Install
 
 ## Swift Package Manager
