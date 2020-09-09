@@ -212,6 +212,14 @@ public class Statement {
         return Data(bytes: ptr, count: Int(len))
     }
     
+    /// Retrieve a UUID, please note that UUIDs are not really supported by sqlite, and are stored as plain text.
+    /// - Parameter column: column: Column index (zero based)
+    /// - Returns: UUID value
+    public func uuid(column:Int) -> UUID? {
+        guard let text = string(column: column) else { return nil }
+        return UUID(uuidString: text)
+    }
+    
     /// Bind a nil value
     ///
     /// By default, the value is already bound to nil, however, this can be used for prepared statemts to re-bind a value.
@@ -290,7 +298,7 @@ public class Statement {
         try bind(param: param, value32)
     }
     
-    /// Bind an string value to a statement
+    /// Bind a string value to a statement
     /// - Parameters:
     ///   - param: Parameter number (1 based)
     ///   - value: String value, or nil
@@ -316,7 +324,7 @@ public class Statement {
         }
     }
     
-    /// Bind an data (BLOB) value to a statement
+    /// Bind a data (BLOB) value to a statement
     /// - Parameters:
     ///   - param: Parameter number (1 based)
     ///   - value: Data value, or nil
@@ -329,6 +337,15 @@ public class Statement {
         } else {
             try bind(param: param)
         }
+    }
+    
+    /// Binds a uuid value to a statement, SQLite has no UUID support, so wer'e converting UUIDs to strings
+    /// - Parameters:
+    ///   - param: Parameter number (1 based)
+    ///   - value: UUID value, or nil
+    /// - Throws: DatabaseError
+    public func bind(param:Int, _ value:UUID?) throws {
+        try bind(param: param, value?.uuidString)
     }
     
     /// Step a statement

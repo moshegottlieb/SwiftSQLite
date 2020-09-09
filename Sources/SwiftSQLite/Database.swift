@@ -15,6 +15,14 @@ public class Database {
     /// - Parameter path: Path (or URI) to the database file. The path `file::memory:` is used by default (in-memory database).
     /// - Throws: DatabaseError
     public init(path:String = "file::memory:") throws {
+        try open(path:path)
+    }
+    
+    /// Opens a new databae connection, the old connection is closed if open
+    /// - Parameter path: Path (or URI) to the database file. The path `file::memory:` is used by default (in-memory database).
+    /// - Throws: DatabaseError
+    public func open(path:String = "file::memory:") throws {
+        close()
         var lhandle : OpaquePointer?
         let rc = sqlite3_open(path, &lhandle)
         defer {
@@ -23,7 +31,7 @@ public class Database {
             }
         }
         try Database.check(rc,handle: lhandle)
-        self.handle = lhandle!
+        self.handle = lhandle
     }
     
     /// A convenience utility to create a new statement
@@ -223,9 +231,15 @@ public class Database {
         try check(sqlite3_busy_timeout(self.handle,Int32(ms)))
     }
     
+    /// Close a database connection
+    public func close(){
+        guard handle != nil else { return }
+        sqlite3_close(handle)
+        handle = nil
+    }
     
     deinit {
-        sqlite3_close(handle)
+        close()
     }
     
     /// The last SQLite row ID
@@ -290,5 +304,5 @@ public class Database {
         
     }
     
-    internal let handle: OpaquePointer
+    internal var handle: OpaquePointer?
 }

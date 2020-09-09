@@ -23,6 +23,12 @@ If you want a light local database API without all the bells and whistles of oth
 guard let path = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first?.appendingPathComponent("db.sqlite").absoluteString else { fatalError("Could not create path") }
 let db = try Database(path:path)
 ```
+### Open or close a DB connection explicitly
+Sometimes you'd want to close or open a databasse explicitly, and not just using the CTOR and DTOR.  
+```swift
+db.close() // will silently do nothing if already closed
+try db.open(pathToFile) // Open a new connection, the old handle is closed first
+```
 
 ### Run a simple SQL statement
 ```swift
