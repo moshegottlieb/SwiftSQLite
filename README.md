@@ -123,7 +123,7 @@ Add the following to your Package.swift dependencies:
 ```swift
 dependencies: [
 ...
-.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.5")
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.7")
 ...
 ]
 ```

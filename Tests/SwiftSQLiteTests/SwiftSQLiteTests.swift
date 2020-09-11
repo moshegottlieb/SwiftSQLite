@@ -174,6 +174,16 @@ final class SwiftSQLiteTests: XCTestCase {
         }
         XCTAssertNoThrow(try t())
     }
+    
+    func testMultiple(){
+        let t = {
+            try self.db.exec("CREATE TABLE M1(a INTEGER PRIMARY KEY NOT NULL); INSERT INTO M1 (a) VALUES (1); DELETE FROM M1; INSERT INTO M1 (a) VALUES (1);")
+            let stmt = try self.db.statement(sql: "SELECT a FROM M1")
+            XCTAssert(try stmt.step())
+            XCTAssertEqual(stmt.integer(column: 0), 1)
+        }
+        XCTAssertNoThrow(try t())
+    }
 
     func testVersion(){
         let t = {
@@ -195,7 +205,8 @@ final class SwiftSQLiteTests: XCTestCase {
         ("testLastRowId", testLastRowId),
         ("testJournalMode", testJournalMode),
         ("testForeignKeys", testForeignKeys),
-        ("testVersion", testVersion)
+        ("testMultiple", testMultiple),
+        ("testVersion", testVersion),
     ]
     
     private var db:Database!

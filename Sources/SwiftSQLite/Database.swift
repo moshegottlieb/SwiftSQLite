@@ -107,8 +107,7 @@ public class Database {
     /// - Parameter sql: SQL statement
     /// - Throws: DatabaseError
     public func exec(_ sql:String) throws {
-        let stmt = try Statement(database: self, sql: sql)
-        try stmt.step()
+        try check(sqlite3_exec(handle, sql, nil, nil, nil))
     }
     
     /// Set to `true` to enforce foreign keys, or `false` to disable foreign keys. See [PRAGMA foreign_keys](https://sqlite.org/pragma.html#pragma_foreign_keys) for more information.
