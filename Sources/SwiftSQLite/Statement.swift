@@ -184,9 +184,8 @@ public class Statement {
     /// Fetch and decode a JSON value, the value should be saved in either a data or string object, as defined in `Database.useJSON1`, **true** means use a string value, **false** means use a BLOB value.
     /// - Parameters:
     ///   - column: column: Column index (zero based)
-    ///   - decoder: An optional custom JSONDecoder
     /// - Returns: A decoded instance, if not null AND a successful conversion exists
-    public func object<O:Decodable>(column:Int,decoder:JSONDecoder = JSONDecoder()) -> O? {
+    public func object<O:Decodable>(column:Int) -> O? {
         guard !isNull(column: column) else { return nil }
         let data:Data?
         if db.useJSON1 {
@@ -196,7 +195,7 @@ public class Statement {
             data = self.data(column: column)
         }
         guard let cdata = data else { return nil }
-        return try? decoder.decode(O.self, from: cdata)
+        return try? db.decoder.decode(O.self, from: cdata)
     }
     
     /// Retrieve a value as a double
@@ -279,11 +278,10 @@ public class Statement {
     /// - Parameters:
     ///   - param: Parameter number (1 based)
     ///   - value: An encodable object
-    ///   - encoder: optional custom JSONEncoder
     /// - Throws: DatabaseError
-    public func bind<V:Encodable>(param:Int, _ value:V?,encoder:JSONEncoder = JSONEncoder()) throws {
+    public func bind<V:Encodable>(param:Int, _ value:V?) throws {
         if let value = value {
-            let data = try encoder.encode(value)
+            let data = try db.encoder.encode(value)
             if self.db.useJSON1 {
                 guard let json = String(data: data, encoding: .utf8) else {
                     throw DatabaseError(reason: "Error converting data to a UTF-8 string", code: -1)

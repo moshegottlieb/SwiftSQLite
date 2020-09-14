@@ -307,5 +307,8 @@ public class Database {
         
     }
     
+    public var encoder = JSONEncoder()
+    public var decoder = JSONDecoder()
+    
     internal var handle: OpaquePointer?
 }
