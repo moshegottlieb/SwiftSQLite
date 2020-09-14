@@ -158,6 +158,10 @@ public class Database {
         return try exec()
     }
     
+    
+    /// Use the JSON1 extension for JSON values, currently it means that codable will use JSONs as strings, and not data.
+    public var useJSON1 = true
+    
     /// Set auto vacuum mode, auto-vacuuming is only possible if the database stores some additional information that allows each database page to be traced backwards to its referrer. Therefore, auto-vacuuming must be turned on before any tables are created. It is not possible to enable or disable auto-vacuum after a table has been created.
     public enum AutoVacuum : Int{
         /// The default setting for auto-vacuum is 0 or "none", unless the SQLITE_DEFAULT_AUTOVACUUM compile-time option is used. The "none" setting means that auto-vacuum is disabled. When auto-vacuum is disabled and data is deleted data from a database, the database file remains the same size. Unused database file pages are added to a "freelist" and reused for subsequent inserts. So no database file space is lost. However, the database file does not shrink. In this mode the VACUUM command can be used to rebuild the entire database file and thus reclaim unused disk space.

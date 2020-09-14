@@ -180,6 +180,25 @@ public class Statement {
         guard !isNull(column: column) else { return nil }
         return String(cString: sqlite3_column_text(stmt, Int32(column)))
     }
+    
+    /// Fetch and decode a JSON value, the value should be saved in either a data or string object, as defined in `Database.useJSON1`, **true** means use a string value, **false** means use a BLOB value.
+    /// - Parameters:
+    ///   - column: column: Column index (zero based)
+    ///   - decoder: An optional custom JSONDecoder
+    /// - Returns: A decoded instance, if not null AND a successful conversion exists
+    public func object<O:Decodable>(column:Int,decoder:JSONDecoder = JSONDecoder()) -> O? {
+        guard !isNull(column: column) else { return nil }
+        let data:Data?
+        if db.useJSON1 {
+            guard let str = string(column: column) else { return nil }
+            data = str.data(using: .utf8)
+        } else {
+            data = self.data(column: column)
+        }
+        guard let cdata = data else { return nil }
+        return try? decoder.decode(O.self, from: cdata)
+    }
+    
     /// Retrieve a value as a double
     /// - Parameter column: column: Column index (zero based)
     /// - Returns: Double value or nil, if the value is null
@@ -251,6 +270,28 @@ public class Statement {
     public func bind(param:Int,_ value:Int64?) throws {
         if let value = value {
             try check(sqlite3_bind_int64(stmt, Int32(param), value))
+        } else {
+            try bind(param: param)
+        }
+    }
+    
+    /// Bind an encodable parameter, depending on the `Database.useJSON1` value, the data is either saved as a blob when `useJSON1` is **false** or string when it is set to **true** (default).
+    /// - Parameters:
+    ///   - param: Parameter number (1 based)
+    ///   - value: An encodable object
+    ///   - encoder: optional custom JSONEncoder
+    /// - Throws: DatabaseError
+    public func bind<V:Encodable>(param:Int, _ value:V?,encoder:JSONEncoder = JSONEncoder()) throws {
+        if let value = value {
+            let data = try encoder.encode(value)
+            if self.db.useJSON1 {
+                guard let json = String(data: data, encoding: .utf8) else {
+                    throw DatabaseError(reason: "Error converting data to a UTF-8 string", code: -1)
+                }
+                try bind(param: param,json)
+            } else {
+                try bind(param:param,data)
+            }
         } else {
             try bind(param: param)
         }

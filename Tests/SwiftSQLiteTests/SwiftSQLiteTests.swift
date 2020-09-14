@@ -195,6 +195,38 @@ final class SwiftSQLiteTests: XCTestCase {
         XCTAssertNoThrow(try t())
     }
     
+    func testCodable() {
+        let t = {
+            struct C : Codable {
+                let a:Int
+            }
+            self.db.useJSON1 = false
+            try self.db.exec("CREATE TABLE json_t(a JSON NOT NULL)")
+            var ins = try self.db.statement(sql: "INSERT INTO json_t (a) VALUES (?)")
+            try ins.bind(param: 1,C(a: 0))
+            try ins.step()
+            var sel = try self.db.statement(sql: "SELECT a FROM json_t LIMIT 1")
+            XCTAssert(try sel.step())
+            var o:C? = sel.object(column: 0)
+            try sel.reset()
+            XCTAssertNotNil(o)
+            try self.db.exec("DROP TABLE json_t")
+            
+            self.db.useJSON1 = true
+            try self.db.exec("CREATE TABLE json_t(a JSON NOT NULL)")
+            ins = try self.db.statement(sql: "INSERT INTO json_t (a) VALUES (?)")
+            try ins.bind(param: 1,C(a: 0))
+            try ins.step()
+            sel = try self.db.statement(sql: "SELECT a FROM json_t LIMIT 1")
+            XCTAssert(try sel.step())
+            o = sel.object(column: 0)
+            try sel.reset()
+            XCTAssertNotNil(o)
+            try self.db.exec("DROP TABLE json_t")
+        }
+        XCTAssertNoThrow(try t())
+    }
+    
     static var allTests = [
         ("testInsert", testInsert),
         ("testInsertNull", testInsertNull),
@@ -207,6 +239,7 @@ final class SwiftSQLiteTests: XCTestCase {
         ("testForeignKeys", testForeignKeys),
         ("testMultiple", testMultiple),
         ("testVersion", testVersion),
+        ("testCodable", testCodable),
     ]
     
     private var db:Database!

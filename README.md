@@ -62,6 +62,26 @@ while try select.step() {
 
 ## Additional helpers and wrappers
 
+### Use codables
+
+```swift
+
+struct C : Codable {
+    let a:Int
+}
+
+db.useJSON1 = true
+try db.exec("CREATE TABLE json_t(a JSON NOT NULL)") // JSON1 extension, JSON is actually TEXT
+let ins = try db.statement(sql: "INSERT INTO json_t (a) VALUES (?)")
+try ins.bind(param: 1,C(a: 0)) // Bind a decodable object
+try ins.step()
+let sel = try db.statement(sql: "SELECT a FROM json_t LIMIT 1")
+guard try sel.step() else { fatalError("Expected step to succeed") }
+guard let o:C? = sel.object(column: 0) // deduce that the object is C by the return type, which must be an optional Decodable
+else { fatalError("Expected object to be decoded to a C instance") }
+
+```
+
 ### Set [journal mode](https://www.sqlite.org/pragma.html#pragma_journal_mode) 
 
 ```swift
@@ -123,7 +143,7 @@ Add the following to your Package.swift dependencies:
 ```swift
 dependencies: [
 ...
-.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.7")
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.8")
 ...
 ]
 ```
