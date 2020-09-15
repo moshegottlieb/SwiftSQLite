@@ -11,20 +11,58 @@ import SQLite3
 /// SQLite database handle wrapper
 public class Database {
     
+    
+    /// Open mode
+    public struct OpenMode : OptionSet {
+        public init(rawValue:Int32){
+            self.rawValue = rawValue
+        }
+        public let rawValue: Int32
+        
+        
+        /// The database is opened in read-only mode. If the database does not already exist, an error is returned.
+        public static let readOnly = OpenMode(rawValue: SQLITE_OPEN_READONLY)
+        /// The database is opened for reading and writing if possible, or reading only if the file is write protected by the operating system. In either case the database must already exist, otherwise an error is returned.
+        public static let readWrite = OpenMode(rawValue: SQLITE_OPEN_READWRITE)
+        /// The database is opened for reading and writing, and is created if it does not already exist.
+        public static let create = OpenMode(rawValue: SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE)
+    }
+    
+    /// Threading model for database open
+    public enum ThreadingModel{
+        /// The new database connection will use the "multi-thread" threading mode. This means that separate threads are allowed to use SQLite at the same time, as long as each thread is using a different database connection.
+        case noMutex
+        /// The new database connection will use the "serialized" threading mode. This means the multiple threads can safely attempt to use the same database connection at the same time. (Mutexes will block any actual concurrency, but in this mode there is no harm in trying.)
+        case fullMutex
+        
+        internal var flag : Int32 {
+            switch self {
+            case .noMutex:
+                return SQLITE_OPEN_NOMUTEX
+            case .fullMutex:
+                return SQLITE_OPEN_FULLMUTEX
+            }
+        }
+    }
+    
     /// Intialize with a database path, ommit the path for a memory based database
-    /// - Parameter path: Path (or URI) to the database file. The path `file::memory:` is used by default (in-memory database).
+    /// - Parameters:
+    ///   - path: Path (or URI) to the database file. The path `file::memory:` is used by default (in-memory database).
+    ///   - mode: Open mode
     /// - Throws: DatabaseError
-    public init(path:String = "file::memory:") throws {
-        try open(path:path)
+    public init(path:String = ":memory:",mode:OpenMode = .create, threading:ThreadingModel = .fullMutex) throws {
+        try open(path:path,mode:mode,threading: threading)
     }
     
     /// Opens a new databae connection, the old connection is closed if open
-    /// - Parameter path: Path (or URI) to the database file. The path `file::memory:` is used by default (in-memory database).
+    /// - Parameters:
+    ///   - path: Path (or URI) to the database file. The path `file::memory:` is used by default (in-memory database).
+    ///   - mode: Open mode
     /// - Throws: DatabaseError
-    public func open(path:String = "file::memory:") throws {
+    public func open(path:String = ":memory:",mode:OpenMode = .create, threading:ThreadingModel = .fullMutex) throws {
         close()
         var lhandle : OpaquePointer?
-        let rc = sqlite3_open(path, &lhandle)
+        let rc = sqlite3_open_v2(path, &lhandle, mode.rawValue | threading.flag ,nil)
         defer {
             if rc != SQLITE_OK , let handle = lhandle {
                 sqlite3_close(handle)
