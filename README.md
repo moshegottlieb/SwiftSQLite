@@ -134,6 +134,36 @@ try db.set(version:12)
 
 ```
 
+### Logging
+
+It is possible to install a logger by implementing the protocol `Log`:
+```swift
+/// Log protocol
+public protocol Log  {
+    /// Log SQL
+    /// - parameters:
+    ///   - prepare: SQL statement being prepared
+    func log(prepare:String)
+    /// Log error
+    /// - parameters:
+    ///  - error: Error text
+    ///  - code: Error code (SQLite state)
+    func log(error:String,code:Int)
+    /// Log statement execution
+    /// - parameters:
+    ///  - sql: Executed SQL
+    func log(sql:String)
+    /// Log a message
+    /// - parameters:
+    ///   - message: Message to log (open DB, etc.)
+    func log(message:String)
+}
+```
+Set the static property `logger` for the `Database` class and you're ready to go.  
+A built in console logger is available, to use it, just add:  
+`Database.logger = ConsoleLog()`   
+Better set it up before using the library (but can be set in any point).
+
 # Install
 
 ## Swift Package Manager

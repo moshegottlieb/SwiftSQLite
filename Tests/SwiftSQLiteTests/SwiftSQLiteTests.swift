@@ -145,7 +145,7 @@ final class SwiftSQLiteTests: XCTestCase {
         let t = {
             try self.db.set(journalMode: .off) // OK to set off for memory databases
             let mode = try self.db.journalMode()
-            XCTAssertEqual(mode, .off)
+            XCTAssertTrue(mode == .off || mode == .memory)
         }
         XCTAssertNoThrow(try t())
     }

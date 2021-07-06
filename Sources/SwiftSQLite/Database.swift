@@ -11,6 +11,8 @@ import SQLite3
 /// SQLite database handle wrapper
 public class Database {
     
+    /// Set a default logger
+    static var logger: Log?
     
     /// Open mode
     public struct OpenMode : OptionSet {
@@ -49,6 +51,7 @@ public class Database {
     /// - Parameters:
     ///   - path: Path (or URI) to the database file. The path `file::memory:` is used by default (in-memory database).
     ///   - mode: Open mode
+    ///   - logger: An optional logger
     /// - Throws: DatabaseError
     public init(path:String = ":memory:",mode:OpenMode = .create, threading:ThreadingModel = .fullMutex) throws {
         try open(path:path,mode:mode,threading: threading)
@@ -70,6 +73,7 @@ public class Database {
         }
         try Database.check(rc,handle: lhandle)
         self.handle = lhandle
+        logger?.log(message: "Opened database: \(path)")
     }
     
     /// A convenience utility to create a new statement
@@ -145,6 +149,7 @@ public class Database {
     /// - Parameter sql: SQL statement
     /// - Throws: DatabaseError
     public func exec(_ sql:String) throws {
+        logger?.log(sql: sql)
         try check(sqlite3_exec(handle, sql, nil, nil, nil))
     }
     
@@ -277,6 +282,7 @@ public class Database {
         guard handle != nil else { return }
         sqlite3_close(handle)
         handle = nil
+        logger?.log(message: "Closed database")
     }
     
     deinit {
@@ -361,20 +367,25 @@ public class Database {
     
     internal static func check(_ rc:Int32,handle:OpaquePointer?) throws {
         guard  rc == SQLITE_OK else {
-            guard let handle = handle else {
-                throw DatabaseError(reason: "Unknown reason", code: rc)
+            let reason:String
+            if let handle = handle {
+                reason = String(cString: sqlite3_errmsg(handle))
+            } else {
+                reason = "Unknown reason"
             }
-            throw DatabaseError(reason: String(cString: sqlite3_errmsg(handle)), code: rc)
+            logger?.log(error: reason,code: Int(rc))
+            throw DatabaseError(reason: reason, code: rc)
         }
     }
     
     internal func check(_ rc:Int32) throws {
         try type(of: self).check(rc,handle: handle)
-        
     }
     
     public var encoder = JSONEncoder()
     public var decoder = JSONDecoder()
-    
+    internal var logger : Log? {
+        return type(of: self).logger
+    }
     internal var handle: OpaquePointer?
 }

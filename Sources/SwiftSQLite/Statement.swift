@@ -40,9 +40,11 @@ public class Statement {
     /// - Throws: Throws a DatabaseError for SQLite errors, tyipcally for syntax errors
     required public init(database:Database,sql:String) throws {
         self.db = database
+        self.sql = sql
         var stmt:OpaquePointer?
         try database.check(sqlite3_prepare_v2(database.handle, sql, -1, &stmt, nil))
         self.stmt = stmt!
+        db.logger?.log(prepare: sql)
     }
     deinit {
         sqlite3_finalize(self.stmt)
@@ -408,6 +410,10 @@ public class Statement {
     /// try stmt.clearBindings()
     /// ```
     @discardableResult public func step() throws -> Bool {
+        if !isOpen {
+            isOpen = true
+            db.logger?.log(sql: sql)
+        }
         let rc = sqlite3_step(stmt)
         switch rc {
         case SQLITE_ROW:
@@ -426,6 +432,7 @@ public class Statement {
     /// - Throws: DatabaseError
     public func reset() throws {
         try check(sqlite3_reset(stmt))
+        isOpen = false
     }
     /// Clear bindings set using the `bind(...)` variants
     /// - Throws: DatabaseError
@@ -437,6 +444,8 @@ public class Statement {
         try db.check(rc)
     }
     
+    private var isOpen = false
+    private let sql:String
     private let stmt:OpaquePointer
     private let db:Database
 }
