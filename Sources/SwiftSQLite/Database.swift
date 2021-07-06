@@ -12,7 +12,7 @@ import SQLite3
 public class Database {
     
     /// Set a default logger
-    static var logger: Log?
+    public static var logger: Log?
     
     /// Open mode
     public struct OpenMode : OptionSet {
