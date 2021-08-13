@@ -141,8 +141,8 @@ public class Statement {
     /// - Returns: Date or nil if the value is nil
     public func date(column:Int) -> Date? {
         guard !isNull(column: column) else { return nil }
-        let tv = Double(sqlite3_column_int64(stmt, Int32(column))) / 1000
-        return Date(timeIntervalSince1970: tv)
+        let value = sqlite3_column_int64(stmt, Int32(column))
+        return Date(epoch: value)
     }
     
     /// Retrieve a column value as a boolean
@@ -305,8 +305,8 @@ public class Statement {
     ///   - value: Date value, or nil
     /// - Throws: DatabaseError
     public func bind(param:Int,_ value:Date?) throws {
-        if let value = value?.timeIntervalSince1970{
-            try check(sqlite3_bind_int64(stmt, Int32(param), Int64(value * 1000)))
+        if let epoch = value?.epoch {
+            try check(sqlite3_bind_int64(stmt, Int32(param), epoch))
         } else {
             try bind(param: param)
         }
