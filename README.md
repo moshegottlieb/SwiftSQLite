@@ -7,12 +7,11 @@ SQLite wrapper for swift, nothing more, nothing less.
 
 ## What is it?
 A simple straight forward wrapper for the C API of SQLite.  
-Connect to SQLite databases, run queries, prepare statements and bind parameters, just like you'd do with the regular SQLite API, just with a swift wrapper.  
-If you want a light local database API without all the bells and whistles of other SQLite wrappers - this library is for you
+Connect to SQLite databases, run queries, prepare statements and bind parameters, just like you'd do with the regular SQLite API, but in swift.  
+If you need a light local database API without all the bells and whistles - this library is for you.  
 
 ## What it is **NOT**
 - This is **not** another ORM database
-- It will not try to save you from using the wrong thread when you shouldn't be doing that
 - It will not guess your scheme, create it, maintain it, and automagically sync to a remote server with zero code on your part - if you like the idea of zero coding - you're in the wrong line of work
 
 ## Cook book
@@ -85,7 +84,7 @@ else { fatalError("Expected object to be decoded to a C instance") }
 ### Set [journal mode](https://www.sqlite.org/pragma.html#pragma_journal_mode) 
 
 ```swift
-try db.set(journalMode: .wal) // Set journaling mode to WAL, useful when several processes read the datbase file, such as with an app and an app extension
+try db.set(journalMode: .wal) // Set journaling mode to WAL, useful when several processes read the database file, such as with an app and an app extension
 let current_mode = try db.journalMode()
 ```
 ### [Auto vacuum](https://sqlite.org/pragma.html#pragma_auto_vacuum)
