@@ -65,18 +65,21 @@ while try select.step() {
 
 ```swift
 
-struct C : Codable {
-    let a:Int
+struct Student : Codable {
+    let name:String
+    let grade:Int
+    let city:String
 }
 
 db.useJSON1 = true
-try db.exec("CREATE TABLE json_t(a JSON NOT NULL)") // JSON1 extension, JSON is actually TEXT
-let ins = try db.statement(sql: "INSERT INTO json_t (a) VALUES (?)")
-try ins.bind(param: 1,C(a: 0)) // Bind a decodable object
-try ins.step()
-let sel = try db.statement(sql: "SELECT a FROM json_t LIMIT 1")
+try db.exec("CREATE TABLE students (value json)") // JSON1 extension, JSON is actually TEXT
+let ins = try db.statement(sql: "INSERT INTO students (value) VALUES (?)")
+let student = Student(name:"Bart Simpson",grade:4,city:"Springfield")
+try ins.bind(param: 1,student) // Bind a decodable object
+try ins.step() // Execute the statement
+let sel = try db.statement(sql: "SELECT json_extract(value,"$.name") FROM students")
 guard try sel.step() else { fatalError("Expected step to succeed") }
-guard let o:C? = sel.object(column: 0) // deduce that the object is C by the return type, which must be an optional Decodable
+guard let the_student:Student? = sel.object(column: 0) // deduce that the object is C by the return type, which must be an optional Decodable
 else { fatalError("Expected object to be decoded to a C instance") }
 
 ```
@@ -172,7 +175,7 @@ Add the following to your Package.swift dependencies:
 ```swift
 dependencies: [
 ...
-.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.8")
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.14")
 ...
 ]
 ```
