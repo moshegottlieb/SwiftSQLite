@@ -47,7 +47,7 @@ public class Statement {
         db.logger?.log(prepare: sql)
     }
     deinit {
-        sqlite3_finalize(self.stmt)
+        finalize()
     }
     
     /// Column type identifier
@@ -440,16 +440,22 @@ public class Statement {
         try check(sqlite3_clear_bindings(stmt))
     }
     
+    /// Finalizes the statement, do not reuse it after finalizing it
+    /// Automatically called when the object destructs, you only need to call this method if it is easier than making the object fall out of scope
+    public func finalize(){
+        guard !isFinalized else { return }
+        isFinalized = true
+        sqlite3_finalize(stmt)
+    }
+    
     private func check(_ rc:Int32) throws {
         try db.check(rc)
     }
     
     private var isOpen = false
+    private var isFinalized = false
     private let sql:String
     private let stmt:OpaquePointer
     private let db:Database
 }
 
-// https://stackoverflow.com/questions/26883131/sqlite-transient-undefined-in-swift
-fileprivate let SQLITE_STATIC = unsafeBitCast(0, to: sqlite3_destructor_type.self)
-fileprivate let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)

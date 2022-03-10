@@ -195,6 +195,53 @@ final class SwiftSQLiteTests: XCTestCase {
         XCTAssertNoThrow(try t())
     }
     
+    func testFunction() {
+        
+        let test_scalar = {
+            try self.db.createScalarFunction(name: "custom_to_string", nArgs: 1, function: { (values:[Value]?) in
+                guard let values = values, values.count == 1 else {
+                    throw DatabaseError(reason: "Expected exactly 1 parameter", code: -1)
+                }
+                let value = values[0].intValue
+                return Result("\(value)")
+            })
+            let stmt = try self.db.statement(sql: "SELECT custom_to_string(10)")
+            XCTAssertTrue(try stmt.step())
+            XCTAssertTrue(stmt.string(column: 0) == "10")
+            stmt.finalize()
+            try self.db.deleteFunction(name: "custom_to_string", nArgs: 1)
+        }
+        
+        let test_aggregate = {
+            try self.db.createAggregateFunction(name: "custom_agg_test", step: { (values:[Value]?,result:Result) in
+                // Sum all arguments
+                var sum = 0
+                values?.forEach({ v in
+                    sum += v.intValue
+                })
+                // Is it the first value we're setting?
+                if result.resultType == .Null {
+                    // Set the initial value, result type will be automatically set to Int
+                    result.intValue = sum
+                } else {
+                    // Nope, not the first time, sum with previous value
+                    result.intValue! += sum
+                }
+            })
+            let stmt = try self.db.statement(sql: "SELECT custom_agg_test(value,1) FROM json_each(json_array(1,2,3))")
+            XCTAssertTrue(try stmt.step())
+            let value = stmt.integer(column: 0)
+            // Should be:
+            // (1 + 1) + (2 + 1) + (3 + 1) = 9
+            XCTAssertEqual(value, 9)
+            stmt.finalize()
+            try self.db.deleteFunction(name: "custom_agg_test")
+        }
+        
+        XCTAssertNoThrow(try test_scalar())
+        XCTAssertNoThrow(try test_aggregate())
+    }
+    
     func testCodable() {
         let t = {
             struct C : Codable {
@@ -240,6 +287,7 @@ final class SwiftSQLiteTests: XCTestCase {
         ("testMultiple", testMultiple),
         ("testVersion", testVersion),
         ("testCodable", testCodable),
+        ("testFunction", testFunction)
     ]
     
     private var db:Database!

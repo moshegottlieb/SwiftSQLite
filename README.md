@@ -136,6 +136,57 @@ try db.set(version:12)
 
 ```
 
+### Custom functions
+
+SQLite lets you create user defined functions, and SwiftSQLite lets you do that in swift 🤓.  
+We'll be using the `Value` and `Result` classes here.  
+A `Value` is an argument provided to your functions, and a `Result`, is a result from your functions.  
+  
+Here's an example of a scalar function: 
+```swift
+try db.createScalarFunction(name: "custom_sum_all_args", nArgs: 1, function: { (values:[Value]?) in
+    var sum = 0
+        values?.forEach({ value in
+            sum += value.intValue
+        })
+    return Result(sum)
+})
+```
+
+Now you can call:
+
+```sql
+SELECT custom_sum_all_args(1,2,3)
+```
+The returned value would be 6! (1+2+3).  
+
+Aggregate functions are a bit more complex, but not to much.  
+Here's a similar example, but as an aggregate function:
+  
+```swift
+try db.createAggregateFunction(name: "custom_agg_test", step: { (values:[Value]?,result:Result) in
+    // Sum all arguments
+    var sum = 0
+    values?.forEach({ v in
+        sum += v.intValue
+    })
+    // Is it the first value we're setting?
+    if result.resultType == .Null {
+        // Set the initial value, result type will be automatically set to Int
+        result.intValue = sum
+    } else {
+        // Nope, not the first time, sum with previous value
+        result.intValue! += sum
+    }
+})
+```
+
+You can now use it as an aggrageted function:  
+```sql
+SELECT custom_agg_test(value,1) FROM json_each(json_array(1,2,3))
+``` 
+The resulting value should be 9. ( (1 + 1) + (2 + 1) + (3 + 1) )
+
 ### Logging
 
 It is possible to install a logger by implementing the protocol `Log`:
@@ -175,7 +226,7 @@ Add the following to your Package.swift dependencies:
 ```swift
 dependencies: [
 ...
-.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.14")
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.2")
 ...
 ]
 ```
