@@ -9,7 +9,7 @@ import Foundation
 import SQLite3
 
 /// SQLValue wrapper
-public class Value {
+public class SQLValue {
     internal init(_ value:OpaquePointer?){
         self.value = value
     }

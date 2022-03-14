@@ -198,12 +198,12 @@ final class SwiftSQLiteTests: XCTestCase {
     func testFunction() {
         
         let test_scalar = {
-            try self.db.createScalarFunction(name: "custom_to_string", nArgs: 1, function: { (values:[Value]?) in
+            try self.db.createScalarFunction(name: "custom_to_string", nArgs: 1, function: { (values:[SQLValue]?) in
                 guard let values = values, values.count == 1 else {
                     throw DatabaseError(reason: "Expected exactly 1 parameter", code: -1)
                 }
                 let value = values[0].intValue
-                return Result("\(value)")
+                return SQLResult("\(value)")
             })
             let stmt = try self.db.statement(sql: "SELECT custom_to_string(10)")
             XCTAssertTrue(try stmt.step())
@@ -213,7 +213,7 @@ final class SwiftSQLiteTests: XCTestCase {
         }
         
         let test_aggregate = {
-            try self.db.createAggregateFunction(name: "custom_agg_test", step: { (values:[Value]?,result:Result) in
+            try self.db.createAggregateFunction(name: "custom_agg_test", step: { (values:[SQLValue]?,result:SQLResult) in
                 // Sum all arguments
                 var sum = 0
                 values?.forEach({ v in

@@ -15,9 +15,9 @@ import XCTest
 /// Result of a custom SQL function
 /// @see Database+Function
 ///
-public class Result {
+public class SQLResult {
     
-    public typealias SQLType = Value.SQLType
+    public typealias SQLType = SQLValue.SQLType
     
     public init(){
         stringValue = nil
@@ -95,41 +95,41 @@ public class Result {
         }
     }
     
-    internal static func allocate(context:OpaquePointer) -> Result{
+    internal static func allocate(context:OpaquePointer) -> SQLResult{
         // what is the pointer size/
-        let size = MemoryLayout<Result>.size
+        let size = MemoryLayout<SQLResult>.size
         // ask SQLite to store a pointer size for later access
         let ptr = sqlite3_aggregate_context(context, Int32(size))
         // First call? if so, value would be zero
         if ptr?.load(as: Int.self) == 0 {
             // Create a standard result
-            let result = Result()
+            let result = SQLResult()
             // Get the address of result object (actual pointer numeric value)
             let addr = unsafeBitCast(result, to: Int.self)
             // Retain it, so it wouldn't be deleted when it falls out of scope in the next curly braces
-            _ = Unmanaged<Result>.passRetained(result) // Retain
+            _ = Unmanaged<SQLResult>.passRetained(result) // Retain
             // Copy the address to the pointer allocated by sqlite
             ptr!.storeBytes(of: addr, as: Int.self)
         }
         // Return the pointer as a Result object
-        let ret = ptr!.assumingMemoryBound(to: Result.self).pointee
+        let ret = ptr!.assumingMemoryBound(to: SQLResult.self).pointee
         return ret
     }
     
-    internal static func final(context:OpaquePointer) -> Result{
+    internal static func final(context:OpaquePointer) -> SQLResult{
         // Retrieve the pointer, size no longer matters, as the result is already allocated, that's how the sqlite API works
         let ptr = sqlite3_aggregate_context(context, Int32(0))
         // Return the pointer as a Result object
-        let ret = ptr!.assumingMemoryBound(to: Result.self).pointee
+        let ret = ptr!.assumingMemoryBound(to: SQLResult.self).pointee
         return ret
     }
     
     internal static func deallocate(context:OpaquePointer){
         let ptr = sqlite3_aggregate_context(context, Int32(0))
         // Get the pointer as a Result object
-        let result = ptr!.assumingMemoryBound(to: Result.self).pointee
+        let result = ptr!.assumingMemoryBound(to: SQLResult.self).pointee
         // Create an unmanged object of this result
-        let unmngd:Unmanaged<Result> = Unmanaged<Result>.passUnretained(result)
+        let unmngd:Unmanaged<SQLResult> = Unmanaged<SQLResult>.passUnretained(result)
         // Explicitly release it, balancing the retian from `allocate()`
         // the result should be destructed when it falls out of scope
         unmngd.release()

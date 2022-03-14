@@ -15,18 +15,18 @@ public extension Database {
     /// Parameter is an array of values
     /// Return one of the supported `Result` values, or nil to return a NULL value
     /// @see Value
-    typealias SQLFunction = ([Value]?) throws -> Result?
+    typealias SQLFunction = ([SQLValue]?) throws -> SQLResult?
     
     /// SQLFunction type used by the `step` function for aggregate functions
     /// Parameter are the previous result value, set to null, and an array of values
     /// Change the value of the Result (including type if needed)
     /// @see Value
     /// @see Result
-    typealias SQLStepFunction = ([Value]?,Result) throws -> Void
+    typealias SQLStepFunction = ([SQLValue]?,SQLResult) throws -> Void
     
     /// SQLFinalFunction type used by the `final` function for aggregate functions
     /// Return one of the supported `Result` values, or nil to return a NULL value
-    typealias SQLFinalFunction = (Result) throws -> Void?
+    typealias SQLFinalFunction = (SQLResult) throws -> Void?
 
     /// Delete a custom function
     /// Match is made by the name and number of arguments
@@ -124,16 +124,16 @@ internal class Context {
 fileprivate func functionCallback(_ context:OpaquePointer?,_ nArgs:Int32,_ args:UnsafeMutablePointer<OpaquePointer?>?) -> Void {
         let context:OpaquePointer! = context
         let appContext = Unmanaged<Context>.fromOpaque(sqlite3_user_data(context)!).takeUnretainedValue()
-        var values = [Value]()
+        var values = [SQLValue]()
         guard let args = args else {
             sqlite3_result_error_nomem(context)
             return
         }
         for i in 0..<nArgs {
-            values.append(Value(args[Int(i)]))
+            values.append(SQLValue(args[Int(i)]))
         }
         do {
-            let result = try appContext.functionCallback?(values) ?? Result()
+            let result = try appContext.functionCallback?(values) ?? SQLResult()
             result.apply(context: context)
         } catch let error as DatabaseError {
             sqlite3_result_error_code(context,error.code)
@@ -145,16 +145,16 @@ fileprivate func functionCallback(_ context:OpaquePointer?,_ nArgs:Int32,_ args:
 fileprivate func stepCallback(_ context:OpaquePointer?,_ nArgs:Int32,_ args:UnsafeMutablePointer<OpaquePointer?>?) -> Void {
         let context:OpaquePointer! = context
     let appContext = Unmanaged<Context>.fromOpaque(sqlite3_user_data(context)!).takeUnretainedValue()
-        var values = [Value]()
+        var values = [SQLValue]()
         guard let args = args else {
             sqlite3_result_error_nomem(context)
             return
         }
         for i in 0..<nArgs {
-            values.append(Value(args[Int(i)]))
+            values.append(SQLValue(args[Int(i)]))
         }
         do {
-            let result = Result.allocate(context: context)
+            let result = SQLResult.allocate(context: context)
             try appContext.stepCallback?(values,result)
         } catch let error as DatabaseError {
             sqlite3_result_error_code(context,error.code)
@@ -167,10 +167,10 @@ fileprivate func finalCallback(_ context:OpaquePointer?) -> Void {
     let appContext = Unmanaged<Context>.fromOpaque(sqlite3_user_data(context)!).takeUnretainedValue()
     do {
         let context:OpaquePointer! = context
-        let result = Result.final(context: context)
+        let result = SQLResult.final(context: context)
         try appContext.finalCallback?(result)
         result.apply(context: context)
-        Result.deallocate(context: context)
+        SQLResult.deallocate(context: context)
     } catch let error as DatabaseError {
         sqlite3_result_error_code(context,error.code)
     } catch {
