@@ -7,9 +7,6 @@
 
 import Foundation
 import SQLite3
-import CloudKit
-import CoreData
-import XCTest
 
 ///
 /// Result of a custom SQL function
