@@ -238,8 +238,44 @@ final class SwiftSQLiteTests: XCTestCase {
             try self.db.deleteFunction(name: "custom_agg_test")
         }
         
+        let test_direct = { (direct:Bool) in
+            let fn_name = "custom_to_string"
+            let scalar:Database.SQLFunction = { (values:[SQLValue]?) in
+                guard let values = values, values.count == 1 else {
+                    throw DatabaseError(reason: "Expected exactly 1 parameter", code: -1)
+                }
+                let value = values[0].intValue
+                return SQLResult("\(value)")
+            }
+            try self.db.createScalarFunction(name: fn_name, nArgs: 1, function: scalar, deterministic: true, directOnly: direct)
+            try self.db.exec("CREATE TABLE numbers(n INT)")
+            
+            try self.db.exec("CREATE TABLE log(line TEXT)")
+            try self.db.exec("""
+CREATE TRIGGER test_trigger AFTER DELETE ON numbers
+FOR EACH ROW
+BEGIN
+    INSERT INTO log (line) VALUES (custom_to_string(old.n));
+END;
+""")
+            try self.db.exec("INSERT INTO numbers (n) VALUES (1)")
+            // Will throw an error if the direct only flag is true, meaning the custom function should not be available for non direct statements (such as triggers)
+            try self.db.exec("DELETE FROM numbers")
+            let stmt = try self.db.statement(sql: "SELECT line FROM log")
+            XCTAssertTrue(try stmt.step())
+            let value = stmt.string(column: 0)
+            stmt.finalize()
+            XCTAssertEqual(value, "1")
+            try self.db.exec("DROP TRIGGER test_trigger")
+            try self.db.exec("DROP TABLE log")
+            try self.db.exec("DROP TABLE numbers")
+            try self.db.deleteFunction(name: fn_name, nArgs: 1)
+        }
+        
         XCTAssertNoThrow(try test_scalar())
         XCTAssertNoThrow(try test_aggregate())
+        XCTAssertNoThrow(try test_direct(false))
+        XCTAssertThrowsError(try test_direct(true))
     }
     
     func testCodable() {
