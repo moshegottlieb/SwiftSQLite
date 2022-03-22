@@ -247,7 +247,7 @@ Add the following to your Package.swift dependencies:
 ```swift
 dependencies: [
 ...
-.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.20")
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.40")
 ...
 ]
 ```
