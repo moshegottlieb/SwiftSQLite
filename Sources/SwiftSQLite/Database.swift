@@ -168,6 +168,21 @@ public class Database {
         }
     }
     
+    /// Enable or disable recursive triggers. See [PRAGMA recursive_triggers](https://www.sqlite.org/pragma.html#pragma_recursive_triggers) for more information.
+    public var recursiveTriggers : Bool {
+        set {
+            let sql = "PRAGMA recursive_triggers = \(newValue ? "true" : "false");"
+            try! exec(sql)
+        }
+        get {
+            let stmt = try! statement(sql: "PRAGMA recursive_triggers")
+            guard try! stmt.step() else {
+                fatalError("Could not get recursive triggers pragma value")
+            }
+            return stmt.bool(column: 0)!
+        }
+    }
+    
     /// A wrapper for `withForeignKeys<R>(on:Bool, exec:() throws ->R) rethrows -> R`, with an ON value, use to perform code with foreign keys support turned on
     /// - Parameter exec: A code block that may throw, and may return any value
     /// - Throws: Rethrows errors thrown from the code block

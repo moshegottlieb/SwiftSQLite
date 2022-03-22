@@ -149,6 +149,32 @@ final class SwiftSQLiteTests: XCTestCase {
         }
         XCTAssertNoThrow(try t())
     }
+    
+    func testRecursiveTriggers(){
+        let t = {
+            try self.db.exec("""
+CREATE TABLE rt(a INTEGER);
+CREATE TRIGGER rt_trigger AFTER INSERT ON rt WHEN new.a < 10
+BEGIN
+    INSERT INTO rt VALUES (new.a + 1);
+END;
+""")
+            self.db.recursiveTriggers = false
+            try self.db.exec("INSERT INTO rt VALUES (1)")
+            let count = try self.db.statement(sql: "SELECT COUNT(*) FROM rt")
+            try XCTAssertTrue(count.step())
+            var value = count.integer(column: 0)
+            XCTAssertEqual(value,2) // One + one time trigger (not recursive)
+            try count.reset()
+            self.db.recursiveTriggers = true
+            try self.db.exec("INSERT INTO rt VALUES (1)")
+            try XCTAssertTrue(count.step())
+            value = count.integer(column: 0)
+            XCTAssertEqual(value,12) // 2 from before + 10 times recursive trigger call
+        }
+        XCTAssertNoThrow(try t())
+    }
+    
     func testForeignKeys(){
         let t = {
             try self.db.exec("CREATE TABLE F1(a INTEGER PRIMARY KEY NOT NULL)")
@@ -320,6 +346,7 @@ END;
         ("testLastRowId", testLastRowId),
         ("testJournalMode", testJournalMode),
         ("testForeignKeys", testForeignKeys),
+        ("testRecursiveTriggers", testRecursiveTriggers),
         ("testMultiple", testMultiple),
         ("testVersion", testVersion),
         ("testCodable", testCodable),
