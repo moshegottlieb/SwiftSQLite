@@ -113,6 +113,27 @@ try db.withForeignKeys {
     // This code will run with foreign keys enforcement
 }
 ```
+
+### [Recursive triggers on/off](https://www.sqlite.org/pragma.html#pragma_recursive_triggers)
+Recursive triggers are off by default, but according to the docs, _may be turned on by default in future versions_.  
+An example of a self limiting recursive trigger:
+```sql
+CREATE TABLE rt(a INTEGER);
+CREATE TRIGGER rt_trigger AFTER INSERT ON rt WHEN new.a < 10
+BEGIN
+    INSERT INTO rt VALUES (new.a + 1);
+END;
+```
+
+```swift
+db.recursiveTriggers = true
+try db.exec("INSERT INTO rt VALUES (1)")
+// rt should now have the 10 values (1..10)
+// if recursiveTriggers was off - rt would only have 2 rows (1,2) as the trigger would not trigger itself.
+```
+
+
+
 ### Set busy timeout
 ```swift
 try db.set(busyTimoeut:30)
