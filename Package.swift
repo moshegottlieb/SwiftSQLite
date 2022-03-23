@@ -12,11 +12,6 @@ let package = Package(
             targets: ["SwiftSQLite"]),
     ],
     dependencies: [
-        #if os(Linux)
-        "SQLite3"
-        #endif
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -27,13 +22,16 @@ let package = Package(
         .testTarget(
             name: "SwiftSQLiteTests",
             dependencies: ["SwiftSQLite"]),
-        #if os(Linux)
-        .systemLibrary(
-            name: "SQLite3",
-            providers: [
-                .apt(["libsqlite3-dev"]),
-                .yum(["sqlite-devel"])]),
-        #endif
     ]
 )
 
+#if os(Linux)
+package.targets.append(
+    .systemLibrary(
+        name: "SQLite3",
+        providers: [
+            .apt(["libsqlite3-dev"]),
+            .yum(["sqlite-devel"])])
+)
+package.targets[0].dependencies.append(.target(name: "SQLite3"))
+#endif
