@@ -1,7 +1,7 @@
 # SwiftSQLite
 
 ![Swift](https://github.com/moshegottlieb/SwiftSQLite/workflows/Swift/badge.svg)
-![Swift-Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmoshegottlieb%2FSwiftSQLite%2Fbadge%3Ftype%3Dswift-versions)]
+![Swift-Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmoshegottlieb%2FSwiftSQLite%2Fbadge%3Ftype%3Dswift-versions)
 ![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmoshegottlieb%2FSwiftSQLite%2Fbadge%3Ftype%3Dplatforms)
 
 
