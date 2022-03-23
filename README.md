@@ -1,8 +1,10 @@
 # SwiftSQLite
 
 ![Swift](https://github.com/moshegottlieb/SwiftSQLite/workflows/Swift/badge.svg)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmoshegottlieb%2FSwiftSQLite%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/moshegottlieb/SwiftSQLite)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmoshegottlieb%2FSwiftSQLite%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/moshegottlieb/SwiftSQLite)
+![License](https://img.shields.io/badge/License-MIT-success?style=plastic)
+![Swift Version](https://img.shields.io/badge/Swift-5.5-success?style=plastic)
+![Platforms](https://img.shields.io/badge/Platform-iOS|macOS|tvOS|watchOS|Linux-success?style=plastic)
+![SQLite](https://img.shields.io/badge/SQLite-%3E%3D3.19.0-success?style=plastic&logo=SQLite)
 
 
 SQLite wrapper for swift, nothing more, nothing less.  
@@ -259,3 +261,12 @@ Select your project, in the *general* tab, under *Frameworks and Libraries*, hit
 Enter the URL:  
 `https://github.com/moshegottlieb/SwiftSQLite.git`  
 Choose your version, and you're done.
+
+## Linux dependencies
+
+The swift package manager does not automatically install the required dependencies.  
+On ubuntu/debian flavors:  
+`sudo apt-get install libsqlite3-dev`  
+On RedHat/Centos flavors:  
+`sudo yum install sqlite-devel`  
+
