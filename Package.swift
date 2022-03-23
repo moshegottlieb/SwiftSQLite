@@ -12,6 +12,9 @@ let package = Package(
             targets: ["SwiftSQLite"]),
     ],
     dependencies: [
+        #if os(Linux)
+        "SQLite3"
+        #endif
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
     ],
@@ -24,5 +27,13 @@ let package = Package(
         .testTarget(
             name: "SwiftSQLiteTests",
             dependencies: ["SwiftSQLite"]),
+        #if os(Linux)
+        .systemLibrary(
+            name: "SQLite3",
+            providers: [
+                .apt(["libsqlite3-dev"]),
+                .yum(["sqlite-devel"])]),
+        #endif
     ]
 )
+

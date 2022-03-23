@@ -1,0 +1,6 @@
+module SQLite3 [system] {
+    header "/usr/include/sqlite3.h"
+    link "sqlite3"
+    export *
+}
+
