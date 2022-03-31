@@ -247,8 +247,10 @@ public class Statement {
     /// It is recommended to `clearBindings` after a `reset()` instead.
     /// - Parameter param: Parameter number (1 based)
     /// - Throws: DatabaseError
-    public func bind(param:Int) throws {
+    @discardableResult public func bind(param:Int = autoParam) throws -> Self {
+        let param = autoParamIndex(param)
         try check(sqlite3_bind_null(stmt, Int32(param)))
+        return self
     }
     
     /// Bind an Int32 value to a statement
@@ -256,11 +258,12 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: Int32 value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int,_ value:Int32?) throws {
+    @discardableResult public func bind(param:Int = autoParam,_ value:Int32?) throws -> Self{
         if let value = value {
-            try check(sqlite3_bind_int(stmt, Int32(param), value))
+            let param = autoParamIndex(param)
+            return try check(sqlite3_bind_int(stmt, Int32(param), value))
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     /// Bind an Int64 value to a statement
@@ -268,11 +271,12 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: Int64 value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int,_ value:Int64?) throws {
+    @discardableResult public func bind(param:Int = autoParam,_ value:Int64?) throws -> Self {
         if let value = value {
-            try check(sqlite3_bind_int64(stmt, Int32(param), value))
+            let param = autoParamIndex(param)
+            return try check(sqlite3_bind_int64(stmt, Int32(param), value))
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     
@@ -281,19 +285,19 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: An encodable object
     /// - Throws: DatabaseError
-    public func bind<V:Encodable>(param:Int, _ value:V?) throws {
+    @discardableResult public func bind<V:Encodable>(param:Int = autoParam, _ value:V?) throws -> Self {
         if let value = value {
             let data = try db.encoder.encode(value)
             if self.db.useJSON1 {
                 guard let json = String(data: data, encoding: .utf8) else {
                     throw DatabaseError(reason: "Error converting data to a UTF-8 string", code: -1)
                 }
-                try bind(param: param,json)
+                return try bind(param: param,json)
             } else {
-                try bind(param:param,data)
+                return try bind(param:param,data)
             }
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     
@@ -304,11 +308,12 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: Date value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int,_ value:Date?) throws {
+    @discardableResult public func bind(param:Int = autoParam,_ value:Date?) throws -> Self{
         if let epoch = value?.epoch {
-            try check(sqlite3_bind_int64(stmt, Int32(param), epoch))
+            let param = autoParamIndex(param)
+            return try check(sqlite3_bind_int64(stmt, Int32(param), epoch))
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     /// Bind a Bool value to a statement
@@ -316,11 +321,12 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: Bool value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int,_ value:Bool?) throws {
+    @discardableResult public func bind(param:Int = autoParam,_ value:Bool?) throws -> Self{
         if let value = value {
-            try check(sqlite3_bind_int(stmt, Int32(param), value ? 1 : 0))
+            let param = autoParamIndex(param)
+            return try check(sqlite3_bind_int(stmt, Int32(param), value ? 1 : 0))
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     
@@ -329,14 +335,14 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: Int value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int,_ value:Int?) throws {
+    @discardableResult public func bind(param:Int = autoParam,_ value:Int?) throws -> Self{
         let value32:Int32?
         if let value = value {
             value32 = Int32(value)
         } else {
             value32 = nil
         }
-        try bind(param: param, value32)
+        return try bind(param: param, value32)
     }
     
     /// Bind a string value to a statement
@@ -344,11 +350,12 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: String value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int, _ value:String?) throws{
+    @discardableResult public func bind(param:Int = autoParam, _ value:String?) throws -> Self{
         if let value = value {
-            try check(sqlite3_bind_text(stmt, Int32(param), value, -1, SQLITE_TRANSIENT))
+            let param = autoParamIndex(param)
+            return try check(sqlite3_bind_text(stmt, Int32(param), value, -1, SQLITE_TRANSIENT))
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     
@@ -357,11 +364,12 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: Double value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int, _ value:Double?) throws {
+    @discardableResult public func bind(param:Int = autoParam, _ value:Double?) throws -> Self{
         if let value = value {
-            try check(sqlite3_bind_double(stmt, Int32(param), value))
+            let param = autoParamIndex(param)
+            return try check(sqlite3_bind_double(stmt, Int32(param), value))
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     
@@ -370,13 +378,14 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: Data value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int, _ value:Data?) throws {
+    @discardableResult public func bind(param:Int = autoParam, _ value:Data?) throws -> Self{
         if let value = value {
-            try value.withUnsafeBytes { (body:UnsafeRawBufferPointer) in
-                try check(sqlite3_bind_blob(stmt, Int32(param), body.baseAddress, Int32(value.count), SQLITE_TRANSIENT))
+            return try value.withUnsafeBytes { (body:UnsafeRawBufferPointer) in
+                let param = autoParamIndex(param)
+                return try check(sqlite3_bind_blob(stmt, Int32(param), body.baseAddress, Int32(value.count), SQLITE_TRANSIENT))
             }
         } else {
-            try bind(param: param)
+            return try bind(param: param)
         }
     }
     
@@ -385,8 +394,8 @@ public class Statement {
     ///   - param: Parameter number (1 based)
     ///   - value: UUID value, or nil
     /// - Throws: DatabaseError
-    public func bind(param:Int, _ value:UUID?) throws {
-        try bind(param: param, value?.uuidString)
+    @discardableResult public func bind(param:Int = autoParam, _ value:UUID?) throws -> Self{
+        return try bind(param: param, value?.uuidString)
     }
     
     /// Step a statement
@@ -433,6 +442,7 @@ public class Statement {
     public func reset() throws {
         try check(sqlite3_reset(stmt))
         isOpen = false
+        paramIndex = 0
     }
     /// Clear bindings set using the `bind(...)` variants
     /// - Throws: DatabaseError
@@ -448,8 +458,17 @@ public class Statement {
         sqlite3_finalize(stmt)
     }
     
-    private func check(_ rc:Int32) throws {
+    @discardableResult private func check(_ rc:Int32) throws -> Self{
         try db.check(rc)
+        return self
+    }
+    
+    private func autoParamIndex(_ value:Int) -> Int {
+        guard value == Statement.autoParam else {
+            return value
+        }
+        paramIndex += 1
+        return paramIndex
     }
     
     private var isOpen = false
@@ -457,5 +476,7 @@ public class Statement {
     private let sql:String
     private let stmt:OpaquePointer
     private let db:Database
+    private var paramIndex = 0
+    public static let autoParam = -1
 }
 

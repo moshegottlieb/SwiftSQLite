@@ -21,6 +21,17 @@ final class SwiftSQLiteTests: XCTestCase {
         XCTAssertNoThrow(try t())
     }
     
+    func testAutoParam(){
+        let t = {
+            let stmt = try self.db.statement(sql: "SELECT ?,?,?")
+            XCTAssertTrue(try stmt.bind(1).bind(2).bind(3).step())
+            XCTAssertEqual(stmt.integer(column: 0), 1)
+            XCTAssertEqual(stmt.integer(column: 1), 2)
+            XCTAssertEqual(stmt.integer(column: 2), 3)
+        }
+        XCTAssertNoThrow(try t())
+    }
+    
     
     func testInsertNull(){
         let t = {
@@ -350,7 +361,8 @@ END;
         ("testMultiple", testMultiple),
         ("testVersion", testVersion),
         ("testCodable", testCodable),
-        ("testFunction", testFunction)
+        ("testFunction", testFunction),
+        ("testAutoParam", testAutoParam)
     ]
     
     private var db:Database!
