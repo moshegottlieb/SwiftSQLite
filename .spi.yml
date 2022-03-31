@@ -1,6 +1,0 @@
-version: 1
-builder:
-  configs:
-  - platform: linux
-    swift_version: '5.5'
-    image: registry.gitlab.com/finestructure/spi-base:0.6.4
