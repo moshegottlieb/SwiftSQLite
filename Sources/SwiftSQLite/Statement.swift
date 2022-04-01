@@ -245,8 +245,9 @@ public class Statement {
     /// By default, the value is already bound to nil, however, this can be used for prepared statemts to re-bind a value.
     ///
     /// It is recommended to `clearBindings` after a `reset()` instead.
-    /// - Parameter param: Parameter number (1 based)
+    /// - Parameter param: Parameter number (1 based), when omitted, the parameters are added by their order
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam) throws -> Self {
         let param = autoParamIndex(param)
         try check(sqlite3_bind_null(stmt, Int32(param)))
@@ -255,9 +256,10 @@ public class Statement {
     
     /// Bind an Int32 value to a statement
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: Int32 value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam,_ value:Int32?) throws -> Self{
         if let value = value {
             let param = autoParamIndex(param)
@@ -268,9 +270,10 @@ public class Statement {
     }
     /// Bind an Int64 value to a statement
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: Int64 value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam,_ value:Int64?) throws -> Self {
         if let value = value {
             let param = autoParamIndex(param)
@@ -282,9 +285,10 @@ public class Statement {
     
     /// Bind an encodable parameter, depending on the `Database.useJSON1` value, the data is either saved as a blob when `useJSON1` is **false** or string when it is set to **true** (default).
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: An encodable object
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind<V:Encodable>(param:Int = autoParam, _ value:V?) throws -> Self {
         if let value = value {
             let data = try db.encoder.encode(value)
@@ -305,9 +309,10 @@ public class Statement {
     ///
     /// SQLite has no built in date type, instead, the number of milliseconds since 1970 is stored.
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: Date value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam,_ value:Date?) throws -> Self{
         if let epoch = value?.epoch {
             let param = autoParamIndex(param)
@@ -318,9 +323,10 @@ public class Statement {
     }
     /// Bind a Bool value to a statement
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: Bool value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam,_ value:Bool?) throws -> Self{
         if let value = value {
             let param = autoParamIndex(param)
@@ -332,9 +338,10 @@ public class Statement {
     
     /// Bind an Int value to a statement
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: Int value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam,_ value:Int?) throws -> Self{
         let value32:Int32?
         if let value = value {
@@ -347,9 +354,10 @@ public class Statement {
     
     /// Bind a string value to a statement
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: String value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam, _ value:String?) throws -> Self{
         if let value = value {
             let param = autoParamIndex(param)
@@ -361,9 +369,10 @@ public class Statement {
     
     /// Bind an Int32 double to a statement
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: Double value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam, _ value:Double?) throws -> Self{
         if let value = value {
             let param = autoParamIndex(param)
@@ -375,9 +384,10 @@ public class Statement {
     
     /// Bind a data (BLOB) value to a statement
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: Data value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam, _ value:Data?) throws -> Self{
         if let value = value {
             return try value.withUnsafeBytes { (body:UnsafeRawBufferPointer) in
@@ -391,9 +401,10 @@ public class Statement {
     
     /// Binds a uuid value to a statement, SQLite has no UUID support, so wer'e converting UUIDs to strings
     /// - Parameters:
-    ///   - param: Parameter number (1 based)
+    ///   - param: Parameter number (1 based), when omitted, the parameters are added by their order
     ///   - value: UUID value, or nil
     /// - Throws: DatabaseError
+    /// - Returns: Self , so binds could be chained: `stmt.bind("a").bind("b").bind(object)`
     @discardableResult public func bind(param:Int = autoParam, _ value:UUID?) throws -> Self{
         return try bind(param: param, value?.uuidString)
     }
