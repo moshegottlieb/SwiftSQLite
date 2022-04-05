@@ -185,7 +185,7 @@ SELECT custom_sum_all_args(1,2,3)
 ```
 The returned value would be 6! (1+2+3).  
 
-Aggregate functions are a bit more complex, but not to much.  
+Aggregate functions are a bit more complex, but not too much.  
 Here's a similar example, but as an aggregate function:
   
 ```swift
@@ -251,7 +251,7 @@ Add the following to your Package.swift dependencies:
 ```swift
 dependencies: [
 ...
-.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.40")
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.51")
 ...
 ]
 ```
