@@ -6,7 +6,12 @@
 //
 
 import Foundation
+
+#if SWIFT_SQLITE_CIPHER
+import CSQLCipher
+#else
 import SQLite3
+#endif
 
 /// SQLite database handle wrapper
 public class Database {
@@ -132,6 +137,24 @@ public class Database {
         }
         return ret
     }
+    
+    
+#if SWIFT_SQLITE_CIPHER
+    
+    public func setKey(_ key:String) throws {
+        try check(sqlite3_key(handle, key, Int32(key.count)))
+        
+    }
+    public func reKey(_ key:String) throws {
+        try check(sqlite3_rekey(handle, key, Int32(key.count)))
+    }
+    public func removeKey() throws {
+        try check(sqlite3_rekey(handle, nil, 0))
+    }
+    
+#endif
+
+    
     
     /// Set the current [journal mode](https://www.sqlite.org/pragma.html#pragma_journal_mode)
     ///

@@ -6,7 +6,12 @@
 //
 
 import Foundation
+#if SWIFT_SQLITE_CIPHER
+import CSQLCipher
+#else
 import SQLite3
+#endif
+
 
 /// SQL Statement
 ///

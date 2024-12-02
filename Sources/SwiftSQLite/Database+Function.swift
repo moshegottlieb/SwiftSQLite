@@ -6,7 +6,12 @@
 //
 
 import Foundation
+#if SWIFT_SQLITE_CIPHER
+import CSQLCipher
+#else
 import SQLite3
+#endif
+
 
 /// Custom SQL function in swift, something like `SELECT my_custom_discount_function(price) FROM products`
 public extension Database {
