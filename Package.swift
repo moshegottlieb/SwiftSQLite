@@ -20,28 +20,7 @@ let package = Package(
     ],
     dependencies: [],
     targets: [
-        
-        .target(
-            name: "CSQLCipher",
-            cSettings: SwiftSQLCipherCFlags),
-        .target(
-            name: "SwiftSQLCipher",
-            dependencies: [
-                .target(name: "CSQLCipher")
-            ],
-            cSettings: SwiftSQLCipherCFlags,
-            swiftSettings: [
-                .define("SWIFT_SQLITE_CIPHER")
-            ]
-        ),
-        .testTarget(
-            name: "SwiftSQLCipherTests",
-            dependencies: ["SwiftSQLCipher"],
-            swiftSettings: [
-                .define("SWIFT_SQLITE_CIPHER")
-            ]
-        ),
-        
+                
         .target(
             name: "SwiftSQLite",
             dependencies: []),
@@ -49,6 +28,28 @@ let package = Package(
         .testTarget(
             name: "SwiftSQLiteTests",
             dependencies: ["SwiftSQLite"]),
+        
+            .target(
+                name: "CSQLCipher",
+                cSettings: SwiftSQLCipherCFlags),
+            .target(
+                name: "SwiftSQLCipher",
+                dependencies: [
+                    .target(name: "CSQLCipher")
+                ],
+                cSettings: SwiftSQLCipherCFlags,
+                swiftSettings: [
+                    .define("SWIFT_SQLITE_CIPHER")
+                ]
+            ),
+            .testTarget(
+                name: "SwiftSQLCipherTests",
+                dependencies: ["SwiftSQLCipher"],
+                swiftSettings: [
+                    .define("SWIFT_SQLITE_CIPHER")
+                ]
+            ),
+        
     ]
 )
 
@@ -59,6 +60,7 @@ package.targets.append(
         providers: [
             .apt(["libsqlite3-dev"]),
             .yum(["sqlite-devel"])])
+    
 )
 package.targets[0].dependencies.append(.target(name: "SQLite3"))
 #endif
