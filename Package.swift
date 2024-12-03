@@ -29,26 +29,26 @@ let package = Package(
             name: "SwiftSQLiteTests",
             dependencies: ["SwiftSQLite"]),
         
-            .target(
-                name: "CSQLCipher",
-                cSettings: SwiftSQLCipherCFlags),
-            .target(
-                name: "SwiftSQLCipher",
-                dependencies: [
-                    .target(name: "CSQLCipher")
-                ],
-                cSettings: SwiftSQLCipherCFlags,
-                swiftSettings: [
-                    .define("SWIFT_SQLITE_CIPHER")
-                ]
-            ),
-            .testTarget(
-                name: "SwiftSQLCipherTests",
-                dependencies: ["SwiftSQLCipher"],
-                swiftSettings: [
-                    .define("SWIFT_SQLITE_CIPHER")
-                ]
-            ),
+        .target(
+            name: "CSQLCipher",
+            cSettings: SwiftSQLCipherCFlags),
+        .target(
+            name: "SwiftSQLCipher",
+            dependencies: [
+                .target(name: "CSQLCipher")
+            ],
+            cSettings: SwiftSQLCipherCFlags,
+            swiftSettings: [
+                .define("SWIFT_SQLITE_CIPHER")
+            ]
+        ),
+        .testTarget(
+            name: "SwiftSQLCipherTests",
+            dependencies: ["SwiftSQLCipher"],
+            swiftSettings: [
+                .define("SWIFT_SQLITE_CIPHER")
+            ]
+        ),
         
     ]
 )
