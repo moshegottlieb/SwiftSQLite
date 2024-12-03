@@ -259,6 +259,7 @@ If you do not plan on using encryption, I suggest you use `SwiftSQLite` as it wi
 The follwoing methods are available for SQLCipher only:  
 Instead of importing `SwiftSQLite`, import `SwiftSQLCipher`.  
 After opening a database, call `setKey(:)`  
+** SQLCipher cannot be used with your old database, create a new database and call `setKey(:)` to use SQLCipher **  
 
 ```swift
 try db.setKey("TopSecretPassword")
