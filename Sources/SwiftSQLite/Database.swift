@@ -83,6 +83,7 @@ public class Database {
         }
         try Database.check(rc,handle: lhandle)
         self.handle = lhandle
+        self.path = path
         logger?.log(message: "Opened database: \(path)")
     }
     
@@ -146,13 +147,27 @@ public class Database {
     
 #if SWIFT_SQLITE_CIPHER
     
+    /// Set the encryption key (SQLCipher only)
+    ///
+    /// Call this **AFTER** opening a database to set the encryption key
+    /// - Parameter key The key to use to encrypt / decrypt the database
+    /// - throws Error if cannot encrypt
     public func setKey(_ key:String) throws {
         try check(sqlite3_key(handle, key, Int32(key.count)))
         
     }
+    
+    /// Rekey the database, or remove the encryption
+    ///
+    /// You must call this method **AFTER** calling `setKey(:)`
+    /// - Parameter key The new key, or nil to decrypt the database
+    /// - throws Error
     public func reKey(_ key:String) throws {
         try check(sqlite3_rekey(handle, key, Int32(key.count)))
     }
+    /// A helper to decrypt the key.
+    /// Same as `reKey(nil)`
+    /// 
     public func removeKey() throws {
         try check(sqlite3_rekey(handle, nil, 0))
     }
@@ -431,6 +446,7 @@ public class Database {
         return type(of: self).logger
     }
     internal var handle: OpaquePointer?
+    internal var path : String?
 }
 
 // https://stackoverflow.com/questions/26883131/sqlite-transient-undefined-in-swift

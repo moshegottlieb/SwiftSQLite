@@ -242,6 +242,66 @@ A built in console logger is available, to use it, just add:
 `Database.logger = ConsoleLog()`   
 Better set it up before using the library (but can be set in any point).
 
+# SQLCipher
+
+## Support 
+
+SQLCipher is supported from version 1.1.0 and higher  
+
+## SwiftSQLCipher or SwiftSQLite? 
+
+To use SQLCipher instead of SQLite, please refer to `LICENSE.sqlcipher.md` license file.  
+If you do not wish to use it, you can still use the standard package `SwiftSQLite`.  
+If you do not plan on using encryption, I suggest you use `SwiftSQLite` as it will slightly decrease your binary size.    
+
+## How to use SwiftSQLCipher
+
+The follwoing methods are available for SQLCipher only:  
+Instead of importing `SwiftSQLite`, import `SwiftSQLCipher`.  
+After opening a database, call `setKey(:)`  
+
+```swift
+try db.setKey("TopSecretPassword")
+```
+
+This will encrypt the database if it's not already encrypted, and allow reading it if it's encrypted.  
+
+You can also change the database password by calling `reKey(:)`.  
+
+```swift
+try db.setKey("TopSecretPassword") // must call setKey(:) BEFORE calling reKey
+try db.reKey("EvenMoreSecretPassword") // will replace the password to a new key
+try db.reKey(nil) // remove encryption altogether, can now read without SQLCipher
+try db.removeKey() // same as reKey(nil) 
+```
+
+## Keychain support
+
+A keychain helper is included to save the password in the keychain.  
+
+```swift
+    
+    // Save key to keychain
+    // Pass nil to delete the key from the keychain
+    try db.saveToKeyChain(account:"mydb",key:"MySecretPassword")
+    // When sharing the database using a group identifier:
+    try db.saveToKeyChain(account:"mydb",key:"MySecretPassword",accessGroup:"your.group.identifier.if.you.have.it")
+    
+    // Delete the key from the keychain
+    
+    try db.deleteFromKeyChain(account:"mydb")
+    try db.deleteFromKeyChain(account:"mydb",accessGroup:"your.group.identifier.if.you.have.it")
+    
+    // Read the password from the keychain
+    if let password = try db.readFromKeyChain(account:"mydb") {
+        try db.setKey(password)
+    }
+    // of course, readFromKeyChain accepts also an accessGroup:
+    if let password = try db.readFromKeyChain(account:"mydb", accessGroup:"your.group.identifier.if.you.have.it") {
+        try db.setKey(password)
+    }
+```
+
 # Install
 
 ## Swift Package Manager
@@ -251,9 +311,13 @@ Add the following to your Package.swift dependencies:
 ```swift
 dependencies: [
 ...
-.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.0.52")
+.package(url: "https://github.com/moshegottlieb/SwiftSQLite.git", from: "1.1.0")
 ...
 ]
+
+import SwiftSQLite // for standard SQLite
+import SwiftSQLCipher // for SQLCipher version
+
 ```
 ## How to add to an existing Xcode project
 
@@ -267,6 +331,10 @@ Choose your version, and you're done.
 The swift package manager does not automatically install the required dependencies.  
 On ubuntu/debian flavors:  
 `sudo apt-get install libsqlite3-dev`  
+For SQLCipher:  
+`sudo apt-get install sqlciper-dev`    
+  
 On RedHat/Centos flavors:  
 `sudo yum install sqlite-devel`  
-
+For SQLCipher:  
+`sudo yum install sqlciper-devel`    
