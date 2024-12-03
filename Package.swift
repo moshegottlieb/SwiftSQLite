@@ -30,45 +30,67 @@ let package = Package(
             dependencies: ["SwiftSQLite"]),
         
         .target(
-            name: "CSQLCipher",
-            cSettings: SwiftSQLCipherCFlags),
-        .target(
             name: "SwiftSQLCipher",
-            dependencies: [
-                .target(name: "CSQLCipher")
-            ],
+            dependencies: [],
             cSettings: SwiftSQLCipherCFlags,
             swiftSettings: [
                 .define("SWIFT_SQLITE_CIPHER")
-            ]
+            ],
+            linkerSettings: []
         ),
+        
         .testTarget(
             name: "SwiftSQLCipherTests",
             dependencies: ["SwiftSQLCipher"],
             swiftSettings: [
                 .define("SWIFT_SQLITE_CIPHER")
-            ]
-        ),
+            ],
+            linkerSettings: []
+        )
         
     ]
 )
 
+
 #if os(Linux)
+
 package.targets.append(
     .systemLibrary(
         name: "SQLite3",
         providers: [
             .apt(["libsqlite3-dev"]),
             .yum(["sqlite-devel"])])
-    
 )
-package.targets[0].dependencies.append(.target(name: "SQLite3"))
+
+package.targets.append(
+    .systemLibrary(
+        name: "CSQLCipherLinux",
+        providers: [
+            .apt(["sqlcipher-dev"]),
+            .yum(["sqlcipher-devel"])])
+)
+
+
+package.targets.first( where: { $0.name == "SwiftSQLite"})?.dependencies.append(.target(name: "SQLite3"))
+package.targets.first( where: { $0.name == "SwiftSQLCipher"})?.dependencies.append(.target(name: "CSQLCipherLinux"))
+package.targets.first( where: { $0.name == "SwiftSQLCipher"})?.linkerSettings?.append(.linkedFramework("-lsqlcipher"))
+
+
+#else
+
+package.targets.append(
+    .target(
+        name: "CSQLCipher",
+        cSettings: SwiftSQLCipherCFlags)
+)
+
+package.targets.first( where: { $0.name == "SwiftSQLCipher"})?.dependencies.append(.target(name: "CSQLCipher"))
+
 #endif
 
 
-
 var SwiftSQLCipherCFlags: [CSetting] { [
-    
+
     .define("SQLCIPHER_CRYPTO_CC"),
     .define("SQLITE_HAS_CODEC"),
     .define("NDEBUG"),

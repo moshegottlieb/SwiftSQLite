@@ -283,7 +283,12 @@ END;
                     result.intValue! += sum
                 }
             })
-            let stmt = try self.db.statement(sql: "SELECT custom_agg_test(value,1) FROM json_each(json_array(1,2,3))")
+            
+            try self.db.exec("CREATE TABLE vals (value INTEGER)")
+            
+            try self.db.exec("INSERT INTO vals VALUES (1),(2),(3)")
+            
+            let stmt = try self.db.statement(sql: "SELECT custom_agg_test(value,1) FROM vals")
             XCTAssertTrue(try stmt.step())
             let value = stmt.integer(column: 0)
             // Should be:
@@ -330,7 +335,12 @@ END;
         XCTAssertNoThrow(try test_scalar())
         XCTAssertNoThrow(try test_aggregate())
         XCTAssertNoThrow(try test_direct(false))
+    #if os(Linux)
+        // Don't test direct on linux, not supported
+    #else
         XCTAssertThrowsError(try test_direct(true))
+    #endif
+        
     }
     
     func testCodable() {

@@ -30,7 +30,13 @@ cleanup
 curl -Lo "${TARGZ}" "${SRC_URL}"
 tar zxf "${TARGZ}"
 pushd "${SRC_DIR}"
-./configure --enable-all --with-crypto-lib=none
+
+if [ "$(file_os)" = "Darwin" ]; then
+    ./configure --enable-all --with-crypto-lib=none 
+else
+    ./configure --enable-all
+fi
+
 make sqlite3.c
 popd
 cp "${SRC_DIR}/sqlite3.c" "${CCIPHER_DIR}"

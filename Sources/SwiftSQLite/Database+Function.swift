@@ -6,11 +6,18 @@
 //
 
 import Foundation
+
 #if SWIFT_SQLITE_CIPHER
+    #if os(Linux)
+import CSQLCipherLinux
+    #else
 import CSQLCipher
+    #endif
 #else
 import SQLite3
 #endif
+
+
 
 
 /// Custom SQL function in swift, something like `SELECT my_custom_discount_function(price) FROM products`
@@ -92,9 +99,23 @@ public extension Database {
         if deterministic {
             flags |= SQLITE_DETERMINISTIC
         }
+                
+#if SWIFT_SQLITE_CIPHER
+    #if os(Linux)
+        logger?.log(message: "SQLITE_DIRECTONLY not support on SQLCipher on Linux")
+    #else
         if directOnly {
             flags |= SQLITE_DIRECTONLY
         }
+
+    #endif
+#else
+        if directOnly {
+            flags |= SQLITE_DIRECTONLY
+        }
+
+#endif
+
         try check(sqlite3_create_function_v2(
             handle,
             name,

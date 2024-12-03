@@ -8,10 +8,15 @@
 import Foundation
 
 #if SWIFT_SQLITE_CIPHER
+    #if os(Linux)
+import CSQLCipherLinux
+    #else
 import CSQLCipher
+    #endif
 #else
 import SQLite3
 #endif
+
 
 /// SQLite database handle wrapper
 public class Database {

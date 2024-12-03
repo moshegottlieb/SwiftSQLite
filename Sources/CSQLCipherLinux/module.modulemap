@@ -1,0 +1,6 @@
+
+module CSQLCipherLinux [system] {
+    header "/usr/include/sqlcipher/sqlite3.h"
+    link "sqlcipher"
+    export *
+}
