@@ -8,29 +8,21 @@ import XCTest
 
 
 
-#if SWIFT_SQLITE_CIPHER
 fileprivate let dbPath = FileManager.default.temporaryDirectory.path.appending("/test.sqlite")
-#endif
 
 final class SwiftSQLiteTests: XCTestCase {
-
     
     override func setUpWithError() throws {
-        #if SWIFT_SQLITE_CIPHER
         try? FileManager.default.removeItem(atPath: dbPath)
         db = try Database(path:dbPath)
+        #if SWIFT_SQLITE_CIPHER
         try db.setKey("TopSecret")
-        #else
-        db = try Database()
         #endif
         try db.exec("CREATE TABLE test(a double, b int, c text, d blob)")
     }
     
     override func tearDownWithError() throws {
-        #if SWIFT_SQLITE_CIPHER
         try FileManager.default.removeItem(atPath: dbPath)
-        print("Removed ***************************** \(dbPath)")
-        #endif
     }
     
     
