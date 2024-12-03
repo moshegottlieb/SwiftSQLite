@@ -275,7 +275,7 @@ try db.reKey(nil) // remove encryption altogether, can now read without SQLCiphe
 try db.removeKey() // same as reKey(nil) 
 ```
 
-## Keychain support
+## Keychain support (Apple platforms only)
 
 A keychain helper is included to save the password in the keychain.  
 

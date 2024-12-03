@@ -29,7 +29,7 @@ public extension Database {
         try? old_keychain.deleteItem() // remove old data
     }
     
-    func readFromKeyChain(account:String,key:String?,accessGroup:String?=nil) throws -> String? {
+    func readFromKeyChain(account:String,accessGroup:String?=nil) throws -> String? {
         let keychain = KeychainItem(service: Self.keyChainService, account: account, accessGroup: accessGroup)
         return try? keychain.readItem()
     }
