@@ -2,9 +2,10 @@
 
 ![Swift](https://github.com/moshegottlieb/SwiftSQLite/workflows/Swift/badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-informational?style=flat)
-![Swift Version](https://img.shields.io/badge/Swift-5.5-informational?style=flat)
-![Platforms](https://img.shields.io/badge/Platform-iOS|iOS|macOS|tvOS|watchOS|visionOS|Linux-informational?style=flat)
+![Apple Platforms](https://img.shields.io/badge/Apple-000000?logo=apple&logoColor=F0F0F0)
+![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)
 ![SQLite](https://img.shields.io/badge/SQLite-%3E%3D3.19.0-informational?style=flat&logo=SQLite)
+![SQLCipher](https://img.shields.io/badge/SQLCipher-%20v4.6.1-informational?style=flat)
 
 
 SQLite wrapper for swift, nothing more, nothing less.  
