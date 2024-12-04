@@ -259,21 +259,95 @@ If you do not plan on using encryption, I suggest you use `SwiftSQLite` as it wi
 The follwoing methods are available for SQLCipher only:  
 Instead of importing `SwiftSQLite`, import `SwiftSQLCipher`.  
 After opening a database, call `setKey(:)`  
-** SQLCipher cannot be used with your old database, create a new database and call `setKey(:)` to use SQLCipher **  
 
 ```swift
 try db.setKey("TopSecretPassword")
 ```
 
 This will encrypt the database if it's not already encrypted, and allow reading it if it's encrypted.  
+This must be the first action on your newly created / opened database.  
+You cannot use this method to encrypt already existing data.    
 
 You can also change the database password by calling `reKey(:)`.  
+The database must be opened, encrypted, and the `setKey(:)` method must have been already called.  
 
 ```swift
 try db.setKey("TopSecretPassword") // must call setKey(:) BEFORE calling reKey
 try db.reKey("EvenMoreSecretPassword") // will replace the password to a new key
 try db.reKey(nil) // remove encryption altogether, can now read without SQLCipher
 try db.removeKey() // same as reKey(nil) 
+```
+
+## Advanced SQLCipher support
+
+```swift
+
+// var cipherSalt:Data? { get throws }
+let salt:Data? = try db.cipherSalt // database salt (16 bytes), nil if not encrypted or plain text header
+...
+// func setCipherSalt(_ salt:Data) throws
+let salt:Data = ....
+try db.setCipherSalt(salt) // set the salt for the database. you need this when using plain text header
+...
+// func setPlainTextHeader(size:Int32) throws
+// Set a plain text header for the DB.
+// This causes sqlcipher not to be able to read the salt part of your database, make sure you store it if you use it
+try db.setPlainTextHeader(size:32) // 32 is recommended for iOS WAL journaling in a shared container in iOS
+
+// func flushHeader() throws
+// This simply reads the user version and writes it, you should call this after creating databases with plain text headers
+try db.flushHeader()
+
+```
+
+## iOS mode with WAL mode and shared containers
+
+According to SQLCipher, iOS will check if your database file is an SQLite database in WAL mode, and if so, will allow it to lock the file in the background.  
+Otherwise, your app will be killed when attempting it from the background.  
+Since SQLCipher databases are encrypted, iOS cannot verify the files meet the requirement.  
+Read about it in the [SQLCipher documentation](https://www.zetetic.net/sqlcipher/sqlcipher-api/#cipher_plaintext_header_size).    
+See more in [Apple's documentation](https://www.zetetic.net/sqlcipher/sqlcipher-api/#cipher_plaintext_header_size).  
+The correct sequence you should use is as follows:  
+```swift
+
+    // new database
+    let db = try Database(path: filename)
+    try db.setKey(password)
+    // SAVE this salt somewhere safe
+    guard let salt = try db.cipherSalt else {
+        throw E.error("Could not get salt")
+    }
+    try db.setPlainTextHeader(size: 32)
+    try db.set(journalMode: .wal)
+    try db.flushHeader()
+    
+    // Open an existing database
+    try db.open(path: filename)
+    try db.setKey(password)
+    try db.setPlainTextHeader(size: 32)
+    try db.setCipherSalt(salt)
+    try db.set(journalMode: .wal)
+    // Good to go
+```
+
+There's also a keychain supported version (Apple platforms only) which saves you the trouble.  
+
+```swift
+
+    // func openSharedWalDatabase(path:String,accessGroup:String,identifier:String) throws
+    
+    let db = try Database()
+    // Use a different identifier for each database!
+    try db.openSharedWalDatabase(path:"path/to/file.db",accessGroup:"com.your.shared.identifier",identifier:"MyDB")
+    // Your database is now opened, encrypted, in WAL mode, and the key and salt are stored in the keychain
+    // (even though the salt is not really a secret)
+    
+    // func deleteCredentials(accessGroup:String,identifier:String) throws
+    // This will REMOVE the credentials from the keychain
+    // Important: you cannot access your database after calling this method
+    // Use it when deleting your database file
+    try db.deleteCredentials(accessGroup:"com.your.shared.identifier",identifier:"MyDB")
+
 ```
 
 ## Keychain support (Apple platforms only)

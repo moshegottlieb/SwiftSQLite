@@ -16,9 +16,14 @@ let package = Package(
          SwiftSQLCipher library, using the SQLCipher library, see additional license for details
          */
         .library(name: "SwiftSQLCipher",
-            targets: ["SwiftSQLCipher"])
+            targets: ["SwiftSQLCipher"]),
+        
+        .executable(name: "SwiftSQLCipherTest",
+                    targets: ["SwiftSQLCipherTest"]),
+        
     ],
-    dependencies: [],
+    dependencies: [
+    ],
     targets: [
                 
         .target(
@@ -46,7 +51,17 @@ let package = Package(
                 .define("SWIFT_SQLITE_CIPHER")
             ],
             linkerSettings: []
+        ),
+        
+        .executableTarget(
+            name: "SwiftSQLCipherTest",
+            dependencies: [
+                "SwiftSQLCipher",
+                .product(name: "Logging", package: "swift-log")
+            ]
         )
+        
+        
         
     ]
 )

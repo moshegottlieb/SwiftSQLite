@@ -144,38 +144,6 @@ public class Database {
         return ret
     }
     
-    
-#if SWIFT_SQLITE_CIPHER
-    
-    /// Set the encryption key (SQLCipher only)
-    ///
-    /// Call this **AFTER** opening a database to set the encryption key
-    /// - Parameter key The key to use to encrypt / decrypt the database
-    /// - throws Error if cannot encrypt
-    public func setKey(_ key:String) throws {
-        try check(sqlite3_key(handle, key, Int32(key.count)))
-        
-    }
-    
-    /// Rekey the database, or remove the encryption
-    ///
-    /// You must call this method **AFTER** calling `setKey(:)`
-    /// - Parameter key The new key, or nil to decrypt the database
-    /// - throws Error
-    public func reKey(_ key:String) throws {
-        try check(sqlite3_rekey(handle, key, Int32(key.count)))
-    }
-    /// A helper to decrypt the key.
-    /// Same as `reKey(nil)`
-    /// 
-    public func removeKey() throws {
-        try check(sqlite3_rekey(handle, nil, 0))
-    }
-    
-#endif
-
-    
-    
     /// Set the current [journal mode](https://www.sqlite.org/pragma.html#pragma_journal_mode)
     ///
     /// **Warning**: Never use user input for the schema name, as it would expose your queries to SQL injection attacks

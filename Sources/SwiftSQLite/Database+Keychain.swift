@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Database+Keychain.swift
 //  SwiftSQLite
 //
 //  Created by Moshe Gottlieb on 03.12.24.
@@ -13,7 +13,7 @@ import Foundation
 
 public extension Database {
     
-    private static var keyChainService : String {
+    internal static var keyChainService : String {
         return "com.sharkfood.swiftsqlite.keychain.service"
     }
     
@@ -34,28 +34,12 @@ public extension Database {
         return try? keychain.readItem()
     }
     
-    
-    private static func keychainQuery(withService service: String, account: String? = nil, accessGroup: String? = nil) -> [String: AnyObject] {
-        var query = [String: AnyObject]()
-        query[kSecClass as String] = kSecClassGenericPassword
-        query[kSecAttrService as String] = service as AnyObject?
-        
-        if let account = account {
-            query[kSecAttrAccount as String] = account as AnyObject?
-        }
-        
-        if let accessGroup = accessGroup {
-            query[kSecAttrAccessGroup as String] = accessGroup as AnyObject?
-        }
-        return query
-    }
-    
 }
 
 
 
 
-fileprivate struct KeychainItem {
+internal struct KeychainItem {
     // MARK: Types
     
     public enum KeychainError: Error {
