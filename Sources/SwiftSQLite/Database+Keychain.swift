@@ -44,7 +44,6 @@ internal struct KeychainItem {
     
     public enum KeychainError: Error {
         case noPassword
-        case unexpectedPasswordData
         case unexpectedItemData
         case unhandledError
     }
@@ -92,7 +91,7 @@ internal struct KeychainItem {
         guard let existingItem = queryResult as? [String: AnyObject],
             let passwordData = existingItem[kSecValueData as String] as? Data
             else {
-                throw KeychainError.unexpectedPasswordData
+            throw KeychainError.noPassword
         }
         
         return passwordData
@@ -100,7 +99,7 @@ internal struct KeychainItem {
     
     public func readItem() throws -> String {
         guard let password = String(data: try readItemData(), encoding: String.Encoding.utf8) else {
-            throw KeychainError.unexpectedPasswordData
+            throw KeychainError.noPassword
         }
         return password
     }
