@@ -18,31 +18,32 @@ do {
         Database.logger = SQLLogger()
     }
     let filename = FileManager.default.temporaryDirectory.path.appending("/test.db")
+    let identifier = "my-db"
+    var db:Database!
+    
     defer {
         do {
             try FileManager.default.removeItem(atPath: filename)
+            if let db = db {
+                try db.deleteCredentials(identifier: identifier)
+            }
         } catch {
             print("Could not remove test.db: \(error)")
         }
     }
-    let db = try Database(path: filename)
-    let password = "TopSecret"
-    try db.setKey(password)
-    guard let salt = try db.cipherSalt else {
-        throw E.error("Could not get salt")
-    }
-    try db.setPlainTextHeader(size: 32)
-    try db.set(journalMode: .wal)
-    try db.flushHeader()
-    db.close()
-    try db.open(path: filename)
-    try db.setKey(password)
-    try db.setPlainTextHeader(size: 32)
-    try db.setCipherSalt(salt)
-    try db.set(journalMode: .wal)
-    let stmt = try db.statement(sql: "SELECT COUNT(*) FROM sqlite_master")
-    try stmt.step()
     
+    try db = Database()
+    try db.openSharedWalDatabase(path: filename, identifier: identifier)
+    try db.exec("CREATE TABLE test (a INT)")
+    try db.exec("INSERT INTO test (a) VALUES (1), (2), (3)")
+    db.close()
+    
+    try db.openSharedWalDatabase(path: filename, identifier: identifier)
+    let stmt = try db.statement(sql: "SELECT SUM(a) FROM test")
+    try stmt.step()
+    if stmt.integer(column: 0) != 6 {
+        throw E.error("Unexpected value in DB")
+    }
 } catch {
     print("Error: \(error)")
     exit(1)

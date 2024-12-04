@@ -126,7 +126,7 @@ public extension Database {
     /// This method generates a key, saves it along with the salt in the keychain, and sets a plain text header for your database
     /// - Parameter path Path to the database file
     /// - Parameter accessGroup Shared app group identifier
-    func openSharedWalDatabase(path:String,accessGroup:String,identifier:String) throws {
+    func openSharedWalDatabase(path:String,accessGroup:String? = nil,identifier:String) throws {
         let is_new = !FileManager.default.fileExists(atPath: path)
         let salt_account = "\(identifier)_salt"
         let salt_kc_item = KeychainItem(service: Self.keyChainService, account: salt_account, accessGroup: accessGroup)
@@ -134,6 +134,7 @@ public extension Database {
         let key : String
         if is_new {
             key = UUID().uuidString
+            try key_kc_item.saveItem(key.data(using: .utf8)!)
         } else {
             key = try key_kc_item.readItem()
         }
@@ -144,6 +145,7 @@ public extension Database {
                 throw DatabaseError(reason: "Could not read salt from database", code: -1)
             }
             try salt_kc_item.saveItem(salt)
+            try setPlainTextHeader(size: 32)
         } else {
             try setPlainTextHeader(size: 32)
             let salt = try salt_kc_item.readItemData()
@@ -160,7 +162,7 @@ public extension Database {
     ///
     /// - Parameter accessGroup Shared container identifier
     /// - Parameter identifier Your database identifier
-    func deleteCredentials(accessGroup:String,identifier:String) throws {
+    func deleteCredentials(accessGroup:String? = nil,identifier:String) throws {
         let salt_account = "\(identifier)_salt"
         let salt_kc_item = KeychainItem(service: Self.keyChainService, account: salt_account, accessGroup: accessGroup)
         let key_kc_item = KeychainItem(service: Self.keyChainService, account: identifier, accessGroup: accessGroup)

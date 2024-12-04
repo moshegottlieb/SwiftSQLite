@@ -334,7 +334,7 @@ There's also a keychain supported version (Apple platforms only) which saves you
 
 ```swift
 
-    // func openSharedWalDatabase(path:String,accessGroup:String,identifier:String) throws
+    // func openSharedWalDatabase(path:String,accessGroup:String? = nil,identifier:String) throws
     
     let db = try Database()
     // Use a different identifier for each database!
@@ -342,7 +342,7 @@ There's also a keychain supported version (Apple platforms only) which saves you
     // Your database is now opened, encrypted, in WAL mode, and the key and salt are stored in the keychain
     // (even though the salt is not really a secret)
     
-    // func deleteCredentials(accessGroup:String,identifier:String) throws
+    // func deleteCredentials(accessGroup:String? = nil,identifier:String) throws
     // This will REMOVE the credentials from the keychain
     // Important: you cannot access your database after calling this method
     // Use it when deleting your database file
