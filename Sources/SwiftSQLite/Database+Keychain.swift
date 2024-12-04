@@ -103,33 +103,18 @@ internal struct KeychainItem {
     }
     
     public func saveItem(_ data: Data) throws {
-        
-        do {
-            // Check for an existing item in the keychain.
-            try _ = readItem()
-            
-            // Update the existing item with the new password.
-            var attributesToUpdate = [String: AnyObject]()
-            attributesToUpdate[kSecValueData as String] = data as AnyObject?
-            let query = KeychainItem.keychainQuery(withService: service, account: account, accessGroup: accessGroup)
-            let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
-            
-            // Throw an error if an unexpected status was returned.
-            guard status == noErr else { throw KeychainError.generalError }
-        } catch KeychainError.noPassword {
-            /*
-             No password was found in the keychain. Create a dictionary to save
-             as a new keychain item.
-             */
-            var newItem = KeychainItem.keychainQuery(withService: service, account: account, accessGroup: accessGroup)
-            newItem[kSecValueData as String] = data as AnyObject?
-            newItem[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as AnyObject?
-            // Add a the new item to the keychain.
-            let status = SecItemAdd(newItem as CFDictionary, nil)
-            
-            // Throw an error if an unexpected status was returned.
-            guard status == noErr else { throw KeychainError.generalError }
-        }
+        try? deleteItem()
+        /*
+         Create a dictionary to save
+         as a new keychain item.
+         */
+        var newItem = KeychainItem.keychainQuery(withService: service, account: account, accessGroup: accessGroup)
+        newItem[kSecValueData as String] = data as AnyObject?
+        newItem[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as AnyObject?
+        // Add a the new item to the keychain.
+        let status = SecItemAdd(newItem as CFDictionary, nil)
+        // Throw an error if an unexpected status was returned.
+        guard status == noErr else { throw KeychainError.generalError }
     }
     
     public func saveItem(_ password: String) throws {
