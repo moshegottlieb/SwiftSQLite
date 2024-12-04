@@ -56,8 +56,7 @@ let package = Package(
         .executableTarget(
             name: "SwiftSQLCipherTest",
             dependencies: [
-                "SwiftSQLCipher",
-                .product(name: "Logging", package: "swift-log")
+                "SwiftSQLCipher")
             ]
         )
         
