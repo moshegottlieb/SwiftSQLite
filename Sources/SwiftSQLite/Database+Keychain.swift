@@ -44,8 +44,7 @@ internal struct KeychainItem {
     
     public enum KeychainError: Error {
         case noPassword
-        case unexpectedItemData
-        case unhandledError
+        case generalError
     }
     
     // MARK: Properties
@@ -84,8 +83,7 @@ internal struct KeychainItem {
         }
         
         // Check the return status and throw an error if appropriate.
-        guard status != errSecItemNotFound else { throw KeychainError.noPassword }
-        guard status == noErr else { throw KeychainError.unhandledError }
+        guard status == noErr else { throw KeychainError.noPassword }
         
         // Parse the password string from the query result.
         guard let existingItem = queryResult as? [String: AnyObject],
@@ -117,7 +115,7 @@ internal struct KeychainItem {
             let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
             
             // Throw an error if an unexpected status was returned.
-            guard status == noErr else { throw KeychainError.unhandledError }
+            guard status == noErr else { throw KeychainError.generalError }
         } catch KeychainError.noPassword {
             /*
              No password was found in the keychain. Create a dictionary to save
@@ -130,7 +128,7 @@ internal struct KeychainItem {
             let status = SecItemAdd(newItem as CFDictionary, nil)
             
             // Throw an error if an unexpected status was returned.
-            guard status == noErr else { throw KeychainError.unhandledError }
+            guard status == noErr else { throw KeychainError.generalError }
         }
     }
     
@@ -147,7 +145,7 @@ internal struct KeychainItem {
         let status = SecItemDelete(query as CFDictionary)
         
         // Throw an error if an unexpected status was returned.
-        guard status == noErr || status == errSecItemNotFound else { throw KeychainError.unhandledError }
+        guard status == noErr || status == errSecItemNotFound else { throw KeychainError.generalError }
     }
     
     // MARK: Convenience
