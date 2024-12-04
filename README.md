@@ -3,7 +3,7 @@
 ![Swift](https://github.com/moshegottlieb/SwiftSQLite/workflows/Swift/badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-informational?style=flat)
 ![Swift Version](https://img.shields.io/badge/Swift-5.5-informational?style=flat)
-![Platforms](https://img.shields.io/badge/Platform-iOS|macOS|tvOS|watchOS|Linux-informational?style=flat)
+![Platforms](https://img.shields.io/badge/Platform-iOS|iOS|macOS|tvOS|watchOS|visionOS|Linux-informational?style=flat)
 ![SQLite](https://img.shields.io/badge/SQLite-%3E%3D3.19.0-informational?style=flat&logo=SQLite)
 
 
