@@ -63,8 +63,10 @@ public class Database {
     ///   - mode: Open mode
     ///   - logger: An optional logger
     /// - Throws: DatabaseError
-    public init(path:String = ":memory:",mode:OpenMode = .create, threading:ThreadingModel = .fullMutex) throws {
-        try open(path:path,mode:mode,threading: threading)
+    public init(path:String? = ":memory:",mode:OpenMode = .create, threading:ThreadingModel = .fullMutex) throws {
+        if let path = path {
+            try open(path:path,mode:mode,threading: threading)
+        }
     }
     
     /// Opens a new databae connection, the old connection is closed if open

@@ -126,6 +126,17 @@ public extension Database {
     /// This method generates a key, saves it along with the salt in the keychain, and sets a plain text header for your database
     /// - Parameter path Path to the database file
     /// - Parameter accessGroup Shared app group identifier
+    /// - Parameter identifier Your DB identifier, the keychain item is using this id
+    convenience init(path:String,accessGroup:String? = nil,identifier:String) throws {
+        try self.init(path:nil)
+        try openSharedWalDatabase(path:path,accessGroup:accessGroup,identifier:identifier)
+    }
+    
+    /// Open a shared WAL mode database
+    /// This method generates a key, saves it along with the salt in the keychain, and sets a plain text header for your database
+    /// - Parameter path Path to the database file
+    /// - Parameter accessGroup Shared app group identifier
+    /// - Parameter identifier Your DB identifier, the keychain item is using this id
     func openSharedWalDatabase(path:String,accessGroup:String? = nil,identifier:String) throws {
         let is_new = !FileManager.default.fileExists(atPath: path)
         let salt_account = "\(identifier)_salt"
