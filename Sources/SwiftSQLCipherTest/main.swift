@@ -17,9 +17,11 @@ enum E : Error {
 }
 
 do {
+    #if !os(Linux)
     if #available(macOS 11.0, *) {
         Database.logger = SQLLogger()
     }
+    #endif
     let filename = FileManager.default.temporaryDirectory.path.appending("/test.db")
     let identifier = "my-db"
     var db:Database!
@@ -52,7 +54,7 @@ do {
     exit(1)
 }
 
-
+#if !os(Linux)
 @available(macOS 11.0, *)
 struct SQLLogger : SwiftSQLCipher.Log {
     
@@ -75,3 +77,4 @@ struct SQLLogger : SwiftSQLCipher.Log {
     private var log = Logger()
     
 }
+#endif
