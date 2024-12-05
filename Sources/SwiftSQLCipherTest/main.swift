@@ -7,7 +7,10 @@
 
 import Foundation
 import SwiftSQLCipher
+
+#if !os(Linux)
 import os
+#endif
 
 enum E : Error {
     case error(String)
