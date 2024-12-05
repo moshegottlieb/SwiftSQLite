@@ -5,23 +5,19 @@
 //  Created by Moshe Gottlieb on 04.12.24.
 //
 
+#if !os(Linux)
 import Foundation
 import SwiftSQLCipher
-
-#if !os(Linux)
 import os
-#endif
 
 enum E : Error {
     case error(String)
 }
 
 do {
-    #if !os(Linux)
     if #available(macOS 11.0, *) {
         Database.logger = SQLLogger()
     }
-    #endif
     let filename = FileManager.default.temporaryDirectory.path.appending("/test.db")
     let identifier = "my-db"
     var db:Database!
@@ -54,7 +50,6 @@ do {
     exit(1)
 }
 
-#if !os(Linux)
 @available(macOS 11.0, *)
 struct SQLLogger : SwiftSQLCipher.Log {
     
