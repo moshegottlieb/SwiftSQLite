@@ -126,16 +126,20 @@ public class SQLResult {
     
     internal static func final(context:OpaquePointer) -> SQLResult{
         // Retrieve the pointer, size no longer matters, as the result is already allocated, that's how the sqlite API works
-        let ptr = sqlite3_aggregate_context(context, Int32(0))
+        // No step call happened, so nothing was allocated
+        guard let ptr = sqlite3_aggregate_context(context, Int32(0)) else {
+            return SQLResult()
+        }
         // Return the pointer as a Result object
-        let ret = ptr!.assumingMemoryBound(to: SQLResult.self).pointee
-        return ret
+        return ptr.assumingMemoryBound(to: SQLResult.self).pointee
     }
     
     internal static func deallocate(context:OpaquePointer){
-        let ptr = sqlite3_aggregate_context(context, Int32(0))
+        guard let ptr = sqlite3_aggregate_context(context, Int32(0)) else {
+            return
+        }
         // Get the pointer as a Result object
-        let result = ptr!.assumingMemoryBound(to: SQLResult.self).pointee
+        let result = ptr.assumingMemoryBound(to: SQLResult.self).pointee
         // Create an unmanged object of this result
         let unmngd:Unmanaged<SQLResult> = Unmanaged<SQLResult>.passUnretained(result)
         // Explicitly release it, balancing the retian from `allocate()`

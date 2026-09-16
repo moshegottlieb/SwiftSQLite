@@ -286,11 +286,21 @@ END;
             
             try self.db.exec("CREATE TABLE vals (value INTEGER)")
             
-            try self.db.exec("INSERT INTO vals VALUES (1),(2),(3)")
             
             let stmt = try self.db.statement(sql: "SELECT custom_agg_test(value,1) FROM vals")
             XCTAssertTrue(try stmt.step())
-            let value = stmt.integer(column: 0)
+            
+            var value = stmt.integer(column: 0)
+            // Should be 0
+            XCTAssertEqual(value, 0)
+
+            // now add some values
+            try self.db.exec("INSERT INTO vals VALUES (1),(2),(3)")
+    
+            XCTAssertTrue(try stmt.step())
+            // re-read the value
+            value = stmt.integer(column: 0)
+
             // Should be:
             // (1 + 1) + (2 + 1) + (3 + 1) = 9
             XCTAssertEqual(value, 9)
