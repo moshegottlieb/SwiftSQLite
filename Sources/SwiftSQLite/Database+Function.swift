@@ -124,7 +124,7 @@ public extension Database {
             context_ptr,
             function == nil ? nil : functionCallback,
             step == nil ? nil : stepCallback,
-            // Check if **step** is nil, because we have to provide a callback for final if so.
+            // Check if **step** is nil, because we have to provide a callback for final if not.
             // If the user does not supply a callback, we'll just set the pending result, which is usually what is needed anyway
             step == nil ? nil : finalCallback,
             { // Lastly, the destructor for our context object
@@ -147,7 +147,10 @@ internal class Context {
     
 }
 
-fileprivate func functionCallback(_ context:OpaquePointer?,_ nArgs:Int32,_ args:UnsafeMutablePointer<OpaquePointer?>?) -> Void {
+fileprivate typealias CFunctionCallback = @convention(c) (OpaquePointer?, Int32, UnsafeMutablePointer<OpaquePointer?>?) -> Void
+fileprivate typealias CFinalCallback = @convention(c) (OpaquePointer?) -> Void
+
+fileprivate let functionCallback: CFunctionCallback = { context, nArgs, args in
         let context:OpaquePointer! = context
         let appContext = Unmanaged<Context>.fromOpaque(sqlite3_user_data(context)!).takeUnretainedValue()
         var values = [SQLValue]()
@@ -168,7 +171,7 @@ fileprivate func functionCallback(_ context:OpaquePointer?,_ nArgs:Int32,_ args:
         }
 }
 
-fileprivate func stepCallback(_ context:OpaquePointer?,_ nArgs:Int32,_ args:UnsafeMutablePointer<OpaquePointer?>?) -> Void {
+fileprivate let stepCallback: CFunctionCallback = { context, nArgs, args in
         let context:OpaquePointer! = context
     let appContext = Unmanaged<Context>.fromOpaque(sqlite3_user_data(context)!).takeUnretainedValue()
         var values = [SQLValue]()
@@ -189,7 +192,7 @@ fileprivate func stepCallback(_ context:OpaquePointer?,_ nArgs:Int32,_ args:Unsa
         }
 }
 
-fileprivate func finalCallback(_ context:OpaquePointer?) -> Void {
+fileprivate let finalCallback: CFinalCallback = { context in
     let appContext = Unmanaged<Context>.fromOpaque(sqlite3_user_data(context)!).takeUnretainedValue()
     do {
         let context:OpaquePointer! = context
