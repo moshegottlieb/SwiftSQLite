@@ -172,9 +172,8 @@ final class SwiftSQLiteTests: XCTestCase {
     
     func testJournalMode(){
         let t = {
-            try self.db.set(journalMode: .off) // OK to set off for memory databases
-            let mode = try self.db.journalMode()
-            XCTAssertTrue(mode == .off || mode == .memory)
+            try self.db.set(journalMode: .memory)
+            XCTAssertEqual(try self.db.journalMode(), .memory)
         }
         XCTAssertNoThrow(try t())
     }
@@ -291,12 +290,12 @@ END;
             XCTAssertTrue(try stmt.step())
             
             var value = stmt.integer(column: 0)
-            // Should be 0
-            XCTAssertEqual(value, 0)
+            // No rows, so NULL, like the built in SUM()
+            XCTAssertNil(value)
 
             // now add some values
             try self.db.exec("INSERT INTO vals VALUES (1),(2),(3)")
-    
+            try stmt.reset()
             XCTAssertTrue(try stmt.step())
             // re-read the value
             value = stmt.integer(column: 0)
